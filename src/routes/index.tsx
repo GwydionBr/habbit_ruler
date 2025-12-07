@@ -34,15 +34,25 @@ function Home() {
   const state = Route.useLoaderData();
 
   return (
-    <button
-      type="button"
-      onClick={() => {
-        updateCount({ data: 1 }).then(() => {
-          router.invalidate();
-        });
-      }}
-    >
-      Add 1 to {state}?
-    </button>
+    // <button
+    //   type="button"
+    //   onClick={() => {
+    //     updateCount({ data: 1 }).then(() => {
+    //       router.invalidate();
+    //     });
+    //   }}
+    // >
+    //   Add 1 to {state}?
+    // </button>
+    <div>
+      <h1>Habbit Ruler</h1>
+      <p>Track your habits and see your progress.</p>
+      <button>Add Habbit</button>
+      <button>View Habbits</button>
+      <button>View Progress</button>
+      <button>View Settings</button>
+      <button>View Help</button>
+      <button>View About</button>
+    </div>
   );
 }

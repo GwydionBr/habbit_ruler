@@ -7,6 +7,13 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import "@mantine/core/styles.css";
+import { createTheme, MantineProvider } from "@mantine/core";
+import { ColorSchemeScript } from "@mantine/core";
+
+const theme = createTheme({
+  /** Put your mantine theme override here */
+});
 
 export const Route = createRootRoute({
   head: () => ({
@@ -29,7 +36,9 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <RootDocument>
-      <Outlet />
+      <MantineProvider theme={theme} defaultColorScheme="auto">
+        <Outlet />
+      </MantineProvider>
     </RootDocument>
   );
 }
@@ -39,6 +48,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
     <html>
       <head>
         <HeadContent />
+        <ColorSchemeScript defaultColorScheme="auto" />
       </head>
       <body>
         {children}

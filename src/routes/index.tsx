@@ -2,6 +2,7 @@
 import * as fs from "node:fs";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { Center, Title } from "@mantine/core";
 
 const filePath = "count.txt";
 
@@ -44,15 +45,8 @@ function Home() {
     // >
     //   Add 1 to {state}?
     // </button>
-    <div>
-      <h1>Habbit Ruler</h1>
-      <p>Track your habits and see your progress.</p>
-      <button>Add Habbit</button>
-      <button>View Habbits</button>
-      <button>View Progress</button>
-      <button>View Settings</button>
-      <button>View Help</button>
-      <button>View About</button>
-    </div>
+    <Center>
+      <Title order={1}>Habbit Ruler</Title>
+    </Center>
   );
 }

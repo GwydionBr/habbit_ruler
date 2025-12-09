@@ -15,6 +15,17 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { QueryClient } from "@tanstack/react-query";
+import { auth } from "@clerk/tanstack-react-start/server";
+import { createServerFn } from "@tanstack/react-start";
+import { ClerkProvider } from "@clerk/tanstack-react-start";
+
+const fetchClerkAuth = createServerFn({ method: "GET" }).handler(async () => {
+  const { userId } = await auth();
+
+  return {
+    userId,
+  };
+});
 
 const theme = createTheme({
   /** Put your mantine theme override here */
@@ -23,6 +34,13 @@ const theme = createTheme({
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
+  beforeLoad: async () => {
+    const { userId } = await fetchClerkAuth();
+
+    return {
+      userId,
+    };
+  },
   head: () => ({
     meta: [
       {
@@ -43,11 +61,13 @@ export const Route = createRootRouteWithContext<{
 
 function RootComponent() {
   return (
-    <RootDocument>
-      <MantineProvider theme={theme} defaultColorScheme="auto">
-        <Outlet />
-      </MantineProvider>
-    </RootDocument>
+    <ClerkProvider>
+      <RootDocument>
+        <MantineProvider theme={theme} defaultColorScheme="auto">
+          <Outlet />
+        </MantineProvider>
+      </RootDocument>
+    </ClerkProvider>
   );
 }
 

@@ -16,4 +16,15 @@ export default defineConfig({
     viteReact(),
     netlify(),
   ],
+  optimizeDeps: {
+    include: ["cookie"],
+  },
+  resolve: {
+    alias: [
+      {
+        find: "use-sync-external-store/shim/index.js",
+        replacement: "react",
+      },
+    ],
+  },
 });

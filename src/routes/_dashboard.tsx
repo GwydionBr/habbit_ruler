@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { AppShell, Group, Title, Button } from "@mantine/core";
 import { UserMenu } from "@/components/UserMenu";
+import SchemeToggle from "@/components/Scheme/SchemeToggleButton";
 
 export const Route = createFileRoute("/_dashboard")({
   beforeLoad: ({ context }) => {
@@ -36,6 +37,7 @@ function DashboardLayout() {
             </Button>
           </Group>
           <Group>
+            <SchemeToggle />
             <UserMenu userEmail={user?.email} />
           </Group>
         </Group>

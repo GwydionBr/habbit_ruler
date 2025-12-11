@@ -5,7 +5,7 @@ import {
   Link,
 } from "@tanstack/react-router";
 import { AppShell, Group, Title, Button } from "@mantine/core";
-import { UserMenu } from "@/components/UserMenu";
+import { UserMenu } from "@/components/User/UserMenu";
 import SchemeToggle from "@/components/Scheme/SchemeToggleButton";
 import { settingsQueryOptions } from "@/queries/use-settings";
 import { profileQueryOptions } from "@/queries/use-profile";
@@ -25,8 +25,6 @@ export const Route = createFileRoute("/_dashboard")({
 });
 
 function DashboardLayout() {
-  const { user } = Route.useRouteContext();
-
   return (
     <AppShell header={{ height: 60 }} padding="md">
       <AppShell.Header>

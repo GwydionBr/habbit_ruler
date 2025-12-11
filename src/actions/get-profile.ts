@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getSupabaseServerClient } from "../utils/supabase";
+import { getSupabaseServerClient } from "@/utils/supabase";
 
 export const getProfile = createServerFn({ method: "GET" }).handler(
   async () => {

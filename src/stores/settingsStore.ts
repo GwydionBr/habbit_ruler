@@ -18,7 +18,6 @@ interface SettingsState {
 }
 
 interface SettingsActions {
-  resetStore: () => void;
   setSelectedTab: (tab: SettingsTab) => void;
   setIsModalOpen: (isModalOpen: boolean) => void;
   toggleWorkNavbar: () => void;
@@ -32,11 +31,6 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       selectedTab: SettingsTab.GENERAL,
       isWorkNavbarOpen: true,
       isFinanceNavbarOpen: true,
-      resetStore: () =>
-        set({
-          isModalOpen: false,
-          selectedTab: SettingsTab.GENERAL,
-        }),
 
       setSelectedTab: (tab: SettingsTab) => {
         set({ selectedTab: tab });

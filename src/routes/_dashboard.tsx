@@ -7,6 +7,7 @@ import {
 import { AppShell, Group, Title, Button } from "@mantine/core";
 import { UserMenu } from "@/components/User/UserMenu";
 import SchemeToggle from "@/components/Scheme/SchemeToggleButton";
+import { SettingsSync } from "@/components/Settings/SettingsSync";
 import { settingsQueryOptions } from "@/queries/use-settings";
 import { profileQueryOptions } from "@/queries/use-profile";
 
@@ -26,31 +27,34 @@ export const Route = createFileRoute("/_dashboard")({
 
 function DashboardLayout() {
   return (
-    <AppShell header={{ height: 60 }} padding="md">
-      <AppShell.Header>
-        <Group h="100%" px="md" justify="space-between">
-          <Group>
-            <Button component={Link} to="/dashboard" variant="transparent">
-              <Title order={3} c="violet">
-                Habbit Ruler
-              </Title>
-            </Button>
+    <>
+      <SettingsSync />
+      <AppShell header={{ height: 60 }} padding="md">
+        <AppShell.Header>
+          <Group h="100%" px="md" justify="space-between">
+            <Group>
+              <Button component={Link} to="/dashboard" variant="transparent">
+                <Title order={3} c="violet">
+                  Habbit Ruler
+                </Title>
+              </Button>
+            </Group>
+            <Group>
+              <Button component={Link} to="/test" variant="subtle">
+                Test
+              </Button>
+            </Group>
+            <Group>
+              <SchemeToggle />
+              <UserMenu />
+            </Group>
           </Group>
-          <Group>
-            <Button component={Link} to="/test" variant="subtle">
-              Test
-            </Button>
-          </Group>
-          <Group>
-            <SchemeToggle />
-            <UserMenu />
-          </Group>
-        </Group>
-      </AppShell.Header>
+        </AppShell.Header>
 
-      <AppShell.Main>
-        <Outlet />
-      </AppShell.Main>
-    </AppShell>
+        <AppShell.Main>
+          <Outlet />
+        </AppShell.Main>
+      </AppShell>
+    </>
   );
 }

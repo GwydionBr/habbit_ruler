@@ -15,9 +15,9 @@ import {
 } from "@mantine/core";
 import { useIntl } from "@/hooks/useIntl";
 import {
-  IconClock,
+  IconBriefcase,
   IconCalendar,
-  IconCurrencyEuro,
+  IconCurrencyDollar,
   IconTarget,
   IconArrowRight,
   IconPlus,
@@ -30,19 +30,34 @@ export const Route = createFileRoute("/_dashboard/dashboard")({
 
 const apps = [
   {
-    icon: IconClock,
-    title: "Time Tracker",
-    titleDe: "Zeiterfassung",
+    icon: IconBriefcase,
+    title: "Work",
+    titleDe: "Arbeit",
     description: "Track your project hours and analyze your productivity",
     descriptionDe:
       "Erfasse deine Projektzeiten und analysiere deine Produktivität",
-    color: "grape",
-    gradient: { from: "grape", to: "pink", deg: 135 },
-    link: "/time-tracker",
-    badge: "Coming Soon",
+    color: "blue",
+    gradient: { from: "blue", to: "cyan", deg: 135 },
+    link: "/work",
+    badge: "Active",
     stats: [
       { label: "Heute", value: "0h" },
       { label: "Diese Woche", value: "0h" },
+    ],
+  },
+  {
+    icon: IconCurrencyDollar,
+    title: "Finance",
+    titleDe: "Finanzen",
+    description: "Manage your income, expenses and financial overview",
+    descriptionDe: "Verwalte Einnahmen, Ausgaben und Finanzübersicht",
+    color: "violet",
+    gradient: { from: "violet", to: "grape", deg: 135 },
+    link: "/finance",
+    badge: "Active",
+    stats: [
+      { label: "Diesen Monat", value: "€0" },
+      { label: "Einträge", value: "0" },
     ],
   },
   {
@@ -51,28 +66,13 @@ const apps = [
     titleDe: "Kalender",
     description: "Manage appointments and schedule your time",
     descriptionDe: "Verwalte Termine und plane deine Zeit",
-    color: "violet",
-    gradient: { from: "violet", to: "grape", deg: 135 },
+    color: "cyan",
+    gradient: { from: "cyan", to: "blue", deg: 135 },
     link: "/calendar",
-    badge: "Coming Soon",
+    badge: "Active",
     stats: [
       { label: "Heute", value: "0" },
       { label: "Diese Woche", value: "0" },
-    ],
-  },
-  {
-    icon: IconCurrencyEuro,
-    title: "Finances",
-    titleDe: "Finanzen",
-    description: "Manage your income, expenses and financial overview",
-    descriptionDe: "Verwalte Einnahmen, Ausgaben und Finanzübersicht",
-    color: "indigo",
-    gradient: { from: "indigo", to: "violet", deg: 135 },
-    link: "/finances",
-    badge: "Active",
-    stats: [
-      { label: "Diesen Monat", value: "€0" },
-      { label: "Einträge", value: "0" },
     ],
   },
   {
@@ -84,8 +84,8 @@ const apps = [
       "Baue nachhaltige Gewohnheiten auf und tracke deine Routinen",
     color: "pink",
     gradient: { from: "pink", to: "grape", deg: 135 },
-    link: "/habits",
-    badge: "Coming Soon",
+    link: "/habbit-tracker",
+    badge: "Active",
     stats: [
       { label: "Aktive Habits", value: "0" },
       { label: "Streak", value: "0 Tage" },

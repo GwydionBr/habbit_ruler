@@ -11,8 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteImport } from './routes/_dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardWorkRouteImport } from './routes/_dashboard/work'
 import { Route as DashboardTestRouteImport } from './routes/_dashboard/test'
+import { Route as DashboardHabbitTrackerRouteImport } from './routes/_dashboard/habbit-tracker'
+import { Route as DashboardFinanceRouteImport } from './routes/_dashboard/finance'
 import { Route as DashboardDashboardRouteImport } from './routes/_dashboard/dashboard'
+import { Route as DashboardCalendarRouteImport } from './routes/_dashboard/calendar'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/_dashboard',
@@ -23,9 +27,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardWorkRoute = DashboardWorkRouteImport.update({
+  id: '/work',
+  path: '/work',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardTestRoute = DashboardTestRouteImport.update({
   id: '/test',
   path: '/test',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardHabbitTrackerRoute = DashboardHabbitTrackerRouteImport.update({
+  id: '/habbit-tracker',
+  path: '/habbit-tracker',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardFinanceRoute = DashboardFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardDashboardRoute = DashboardDashboardRouteImport.update({
@@ -33,35 +52,70 @@ const DashboardDashboardRoute = DashboardDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardCalendarRoute = DashboardCalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/calendar': typeof DashboardCalendarRoute
   '/dashboard': typeof DashboardDashboardRoute
+  '/finance': typeof DashboardFinanceRoute
+  '/habbit-tracker': typeof DashboardHabbitTrackerRoute
   '/test': typeof DashboardTestRoute
+  '/work': typeof DashboardWorkRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/calendar': typeof DashboardCalendarRoute
   '/dashboard': typeof DashboardDashboardRoute
+  '/finance': typeof DashboardFinanceRoute
+  '/habbit-tracker': typeof DashboardHabbitTrackerRoute
   '/test': typeof DashboardTestRoute
+  '/work': typeof DashboardWorkRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_dashboard': typeof DashboardRouteWithChildren
+  '/_dashboard/calendar': typeof DashboardCalendarRoute
   '/_dashboard/dashboard': typeof DashboardDashboardRoute
+  '/_dashboard/finance': typeof DashboardFinanceRoute
+  '/_dashboard/habbit-tracker': typeof DashboardHabbitTrackerRoute
   '/_dashboard/test': typeof DashboardTestRoute
+  '/_dashboard/work': typeof DashboardWorkRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/test'
+  fullPaths:
+    | '/'
+    | '/calendar'
+    | '/dashboard'
+    | '/finance'
+    | '/habbit-tracker'
+    | '/test'
+    | '/work'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/test'
+  to:
+    | '/'
+    | '/calendar'
+    | '/dashboard'
+    | '/finance'
+    | '/habbit-tracker'
+    | '/test'
+    | '/work'
   id:
     | '__root__'
     | '/'
     | '/_dashboard'
+    | '/_dashboard/calendar'
     | '/_dashboard/dashboard'
+    | '/_dashboard/finance'
+    | '/_dashboard/habbit-tracker'
     | '/_dashboard/test'
+    | '/_dashboard/work'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -85,11 +139,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_dashboard/work': {
+      id: '/_dashboard/work'
+      path: '/work'
+      fullPath: '/work'
+      preLoaderRoute: typeof DashboardWorkRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/test': {
       id: '/_dashboard/test'
       path: '/test'
       fullPath: '/test'
       preLoaderRoute: typeof DashboardTestRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/habbit-tracker': {
+      id: '/_dashboard/habbit-tracker'
+      path: '/habbit-tracker'
+      fullPath: '/habbit-tracker'
+      preLoaderRoute: typeof DashboardHabbitTrackerRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/finance': {
+      id: '/_dashboard/finance'
+      path: '/finance'
+      fullPath: '/finance'
+      preLoaderRoute: typeof DashboardFinanceRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/_dashboard/dashboard': {
@@ -99,17 +174,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDashboardRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/calendar': {
+      id: '/_dashboard/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof DashboardCalendarRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
 interface DashboardRouteChildren {
+  DashboardCalendarRoute: typeof DashboardCalendarRoute
   DashboardDashboardRoute: typeof DashboardDashboardRoute
+  DashboardFinanceRoute: typeof DashboardFinanceRoute
+  DashboardHabbitTrackerRoute: typeof DashboardHabbitTrackerRoute
   DashboardTestRoute: typeof DashboardTestRoute
+  DashboardWorkRoute: typeof DashboardWorkRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardCalendarRoute: DashboardCalendarRoute,
   DashboardDashboardRoute: DashboardDashboardRoute,
+  DashboardFinanceRoute: DashboardFinanceRoute,
+  DashboardHabbitTrackerRoute: DashboardHabbitTrackerRoute,
   DashboardTestRoute: DashboardTestRoute,
+  DashboardWorkRoute: DashboardWorkRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(

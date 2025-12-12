@@ -121,8 +121,8 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html suppressHydrationWarning>
       <head>
-        <HeadContent />
         <ColorSchemeScript defaultColorScheme="auto" />
+        <HeadContent />
       </head>
       <body>
         {children}

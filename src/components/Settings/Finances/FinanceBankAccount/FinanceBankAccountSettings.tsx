@@ -2,7 +2,7 @@ import { useIntl } from "@/hooks/useIntl";
 import {
   useDeleteBankAccountMutation,
   useBankAccountQuery,
-} from "@/utils/queries/finances/use-bank-account";
+} from "@/queries/finances/use-bank-account";
 
 import { Group, Text } from "@mantine/core";
 import { IconBuildingBank, IconPlus } from "@tabler/icons-react";
@@ -52,7 +52,7 @@ export default function FinanceBankAccountSettings() {
       renderRowContent={renderRowContent}
       renderEditForm={renderEditForm}
       renderAddForm={renderAddForm}
-      onDelete={deleteBankAccountsMutation}
+      onDelete={(ids) => deleteBankAccountsMutation({ data: ids })}
       titleText={getLocalizedText("Bankkonten", "Bank Accounts")}
       emptyText={getLocalizedText("Keine Konten gefunden", "No accounts found")}
       deleteTitle={getLocalizedText("Konto löschen", "Delete Account")}

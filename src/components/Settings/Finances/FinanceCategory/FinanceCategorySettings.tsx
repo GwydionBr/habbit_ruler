@@ -2,7 +2,7 @@ import { useIntl } from "@/hooks/useIntl";
 import {
   useDeleteFinanceCategoryMutation,
   useFinanceCategoriesQuery,
-} from "@/utils/queries/finances/use-finance-category";
+} from "@/queries/finances/use-finance-category";
 
 import { Text } from "@mantine/core";
 import { IconCategoryPlus } from "@tabler/icons-react";

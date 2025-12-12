@@ -1,9 +1,14 @@
-import { AppShell, Group, Button, Title } from "@mantine/core";
+import { useSettingsStore } from "@/stores/settingsStore";
+
+import { AppShell, Group, Button, Title, ActionIcon } from "@mantine/core";
 import { Link, Outlet } from "@tanstack/react-router";
 import SchemeToggle from "@/components/Scheme/SchemeToggleButton";
 import { UserMenu } from "@/components/User/UserMenu";
+import { IconSettings } from "@tabler/icons-react";
+import SettingsModal from "@/components/Settings/SettingsModal";
 
 export function Shell() {
+  const { setIsModalOpen } = useSettingsStore();
   return (
     <AppShell header={{ height: 60 }} padding="md">
       <AppShell.Header>
@@ -21,6 +26,12 @@ export function Shell() {
             </Button>
           </Group>
           <Group>
+            <ActionIcon
+              variant="transparent"
+              onClick={() => setIsModalOpen(true)}
+            >
+              <IconSettings size={16} />
+            </ActionIcon>
             <SchemeToggle />
             <UserMenu />
           </Group>
@@ -30,6 +41,7 @@ export function Shell() {
       <AppShell.Main>
         <Outlet />
       </AppShell.Main>
+      <SettingsModal />
     </AppShell>
   );
 }

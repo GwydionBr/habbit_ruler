@@ -2,7 +2,7 @@ import { useIntl } from "@/hooks/useIntl";
 import {
   useDeleteFinanceClientMutation,
   useFinanceClientQuery,
-} from "@/utils/queries/finances/use-finance-client";
+} from "@/queries/finances/use-finance-client";
 
 import { Group, Text } from "@mantine/core";
 import { IconUserPlus, IconUsers } from "@tabler/icons-react";

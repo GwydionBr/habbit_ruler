@@ -39,6 +39,10 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # VSCode
 .vscode
 
+# Bun
+bun.lock
+.output
+
 # Other
 scripts.md
 tasks.md

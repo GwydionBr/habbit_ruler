@@ -40,8 +40,8 @@ export function UserMenu() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      router.invalidate();
       router.navigate({ to: "/" });
+      router.invalidate();
     } catch (error) {
       console.error("Sign out error:", error);
       throw new Error("Sign out error");

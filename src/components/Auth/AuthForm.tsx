@@ -21,7 +21,7 @@ import {
 import GithubButton from "@/components/Auth/SocialButtons/GithubButton";
 
 import PasswordStrength from "./PasswordStrenght";
-import { signIn, signUp } from "@/actions/auth/credentials";
+import { login, register } from "@/actions/auth/credentials";
 import { showNotification } from "@mantine/notifications";
 type AuthType = "login" | "register";
 
@@ -46,9 +46,9 @@ export default function AuthenticationForm({
     setIsLoading(true);
     try {
       if (type === "login") {
-        await signIn({ data: values });
+        await login({ data: values });
       } else {
-        await signUp({ data: values });
+        await register({ data: values });
       }
       router.invalidate();
       router.navigate({ to: "/dashboard" });

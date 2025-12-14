@@ -3,7 +3,7 @@ import { getSupabaseServerClient } from "@/lib/supabaseServerClient";
 import { z } from "zod";
 
 // Server Function for Signup
-export const signUp = createServerFn({ method: "POST" })
+export const register = createServerFn({ method: "POST" })
   .inputValidator(z.object({ email: z.string(), password: z.string() }))
   .handler(async ({ data }) => {
     const supabase = getSupabaseServerClient();
@@ -20,7 +20,7 @@ export const signUp = createServerFn({ method: "POST" })
   });
 
 // Server Function for Signin
-export const signIn = createServerFn({ method: "POST" })
+export const login = createServerFn({ method: "POST" })
   .inputValidator(z.object({ email: z.string(), password: z.string() }))
   .handler(async ({ data }) => {
     const supabase = getSupabaseServerClient();

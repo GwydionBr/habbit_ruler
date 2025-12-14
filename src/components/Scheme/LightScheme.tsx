@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 import { IconSunHighFilled, IconProps } from "@tabler/icons-react";
-import { ActionIcon, HoverCard, Text } from "@mantine/core";
+import { ActionIcon, HoverCard, Text, MantineColor } from "@mantine/core";
 
 import classes from "./Scheme.module.css";
 
@@ -8,12 +8,14 @@ interface LightSchemeActionIconProps {
   onClick?: () => void;
   active?: boolean;
   navbarMode?: boolean;
+  color?: MantineColor;
 }
 
 export function LightSchemeButton({
   onClick,
   active,
   navbarMode,
+  color,
 }: LightSchemeActionIconProps) {
   return (
     <HoverCard
@@ -28,6 +30,7 @@ export function LightSchemeButton({
           onClick={onClick}
           active={active}
           navbarMode={navbarMode}
+          color={color ?? "var(--mantine-primary-color-6)"}
         />
       </HoverCard.Target>
       <HoverCard.Dropdown>
@@ -40,7 +43,7 @@ export function LightSchemeButton({
 export const LightSchemeActionIcon = forwardRef<
   HTMLButtonElement,
   LightSchemeActionIconProps
->(({ onClick, active, navbarMode }, ref) => {
+>(({ onClick, active, navbarMode, color }, ref) => {
   return (
     <ActionIcon
       ref={ref}
@@ -55,7 +58,7 @@ export const LightSchemeActionIcon = forwardRef<
       }
       className={active ? classes.activeButton : ""}
     >
-      <LightSchemeIcon stroke={1.5} />
+      <LightSchemeIcon color={color} stroke={1.5} />
     </ActionIcon>
   );
 });

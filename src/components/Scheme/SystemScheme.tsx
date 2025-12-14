@@ -32,7 +32,7 @@ export function SystemSchemeButton({
           onClick={onClick}
           active={active}
           navbarMode={navbarMode}
-          color={color ?? "var(--mantine-color-primary)"}
+          color={color}
         />
       </HoverCard.Target>
       <HoverCard.Dropdown>
@@ -63,7 +63,18 @@ export const SystemSchemeActionIcon = forwardRef<
       }
       className={active ? classes.activeButton : ""}
     >
-      <SystemSchemeIcon color={color} stroke={1.5} />
+      <SystemSchemeIcon
+        color={
+          color
+            ? color
+            : navbarMode
+              ? undefined
+              : colorScheme === "light"
+                ? "var(--mantine-primary-color-6)"
+                : "var(--mantine-primary-color-4)"
+        }
+        stroke={1.5}
+      />
     </ActionIcon>
   );
 });

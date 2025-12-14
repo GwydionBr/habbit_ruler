@@ -50,10 +50,11 @@ function Dashboard() {
       descriptionDe:
         "Erfasse deine Projektzeiten und analysiere deine Produktivität",
       link: "/work",
-      badge: "Active",
+      badge: getLocalizedText("Aktiv", "Active"),
+      active: true,
       stats: [
-        { label: "Heute", value: "0h" },
-        { label: "Diese Woche", value: "0h" },
+        { label: getLocalizedText("Heute", "Today"), value: "0h" },
+        { label: getLocalizedText("Diese Woche", "This Week"), value: "0h" },
       ],
       color: {
         base: getThemeColor(workColor, theme),
@@ -68,10 +69,11 @@ function Dashboard() {
       description: "Manage your income, expenses and financial overview",
       descriptionDe: "Verwalte Einnahmen, Ausgaben und Finanzübersicht",
       link: "/finance",
-      badge: "Active",
+      badge: getLocalizedText("Aktiv", "Active"),
+      active: true,
       stats: [
-        { label: "Diesen Monat", value: "€0" },
-        { label: "Einträge", value: "0" },
+        { label: getLocalizedText("Diesen Monat", "This Month"), value: "€0" },
+        { label: getLocalizedText("Einträge", "Entries"), value: "0" },
       ],
       color: {
         base: getThemeColor(financeColor, theme),
@@ -86,10 +88,11 @@ function Dashboard() {
       description: "Manage appointments and schedule your time",
       descriptionDe: "Verwalte Termine und plane deine Zeit",
       link: "/calendar",
-      badge: "Active",
+      badge: getLocalizedText("Aktiv", "Active"),
+      active: true,
       stats: [
-        { label: "Heute", value: "0" },
-        { label: "Diese Woche", value: "0" },
+        { label: getLocalizedText("Heute", "Today"), value: "0" },
+        { label: getLocalizedText("Diese Woche", "This Week"), value: "0" },
       ],
       color: {
         base: getThemeColor(calendarColor, theme),
@@ -105,10 +108,17 @@ function Dashboard() {
       descriptionDe:
         "Baue nachhaltige Gewohnheiten auf und tracke deine Routinen",
       link: "/habbit-tracker",
-      badge: "Active",
+      badge: getLocalizedText("Aktiv", "Active"),
+      active: true,
       stats: [
-        { label: "Aktive Habits", value: "0" },
-        { label: "Streak", value: "0 Tage" },
+        {
+          label: getLocalizedText("Aktive Habits", "Active Habits"),
+          value: "0 " + "Streak",
+        },
+        {
+          label: getLocalizedText("Streak", "Streak"),
+          value: "0 " + getLocalizedText("Tage", "Days"),
+        },
       ],
       color: {
         base: getThemeColor(habitColor, theme),
@@ -144,21 +154,21 @@ function Dashboard() {
               withBorder
               style={{
                 transition: "all 0.3s ease",
-                cursor: app.badge === "Active" ? "pointer" : "default",
-                opacity: app.badge === "Coming Soon" ? 0.7 : 1,
+                cursor: app.active ? "pointer" : "default",
+                opacity: app.active ? 1 : 0.7,
               }}
-              {...(app.badge === "Active" && {
+              {...(app.active && {
                 component: Link,
                 to: app.link,
               })}
               onMouseEnter={(e) => {
-                if (app.badge === "Active") {
+                if (app.active) {
                   e.currentTarget.style.transform = "translateY(-8px)";
                   e.currentTarget.style.boxShadow = `0 12px 32px ${alpha(app.color.base, 0.2)}`;
                 }
               }}
               onMouseLeave={(e) => {
-                if (app.badge === "Active") {
+                if (app.active) {
                   e.currentTarget.style.transform = "translateY(0)";
                   e.currentTarget.style.boxShadow = "";
                 }
@@ -182,23 +192,19 @@ function Dashboard() {
                       </Title>
                       <Badge
                         size="sm"
-                        variant={app.badge === "Active" ? "gradient" : "light"}
-                        gradient={
-                          app.badge === "Active"
-                            ? app.color.gradient
-                            : undefined
-                        }
-                        color={app.badge === "Active" ? undefined : "gray"}
+                        variant={app.active ? "gradient" : "light"}
+                        gradient={app.active ? app.color.gradient : undefined}
+                        color={app.active ? undefined : "gray"}
                         mt={4}
                       >
-                        {app.badge === "Active"
+                        {app.active
                           ? getLocalizedText("Aktiv", "Active")
                           : getLocalizedText("Demnächst", "Coming Soon")}
                       </Badge>
                     </Box>
                   </Group>
 
-                  {app.badge === "Active" && (
+                  {app.active && (
                     <ActionIcon
                       size="lg"
                       variant="subtle"
@@ -230,7 +236,7 @@ function Dashboard() {
                 </Group>
 
                 {/* Quick Actions */}
-                {app.badge === "Active" && (
+                {app.active && (
                   <Group gap="xs" mt="xs">
                     <Tooltip
                       label={getLocalizedText("Neuer Eintrag", "New Entry")}

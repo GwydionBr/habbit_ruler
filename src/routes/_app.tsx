@@ -9,14 +9,14 @@ export const Route = createFileRoute("/_app")({
     if (!context.userId) {
       throw redirect({ to: "/auth" });
     }
+  },
+  loader: async ({ context }) => {
+    const { queryClient } = context;
     const profile =
       await context.queryClient.ensureQueryData(profileQueryOptions);
     if (!profile.initialized) {
       throw redirect({ to: "/new-user" });
     }
-  },
-  loader: async ({ context }) => {
-    const { queryClient } = context;
     await queryClient.ensureQueryData(settingsQueryOptions);
   },
   component: AppLayout,

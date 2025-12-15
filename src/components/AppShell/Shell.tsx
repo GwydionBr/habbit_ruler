@@ -40,8 +40,13 @@ export function Shell() {
   const theme = useMantineTheme();
   return (
     <AppShell header={{ height: 45 }} padding="md">
-      <AppShell.Header bg={alpha(getThemeColor(primaryColor, theme), 0.1)}>
-        <Group h="100%" px="md" justify="space-between">
+      <AppShell.Header>
+        <Group
+          h="100%"
+          px="md"
+          justify="space-between"
+          bg={alpha(getThemeColor(primaryColor, theme), 0.1)}
+        >
           <Group>
             <Button component={Link} to="/dashboard" variant="transparent">
               <Title order={3} c={primaryColor}>

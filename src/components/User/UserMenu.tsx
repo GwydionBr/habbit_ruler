@@ -1,3 +1,9 @@
+import { useRouter } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useIntl } from "@/hooks/useIntl";
+import { useSettingsStore } from "@/stores/settingsStore";
+
 import {
   Menu,
   Button,
@@ -9,12 +15,6 @@ import {
   Box,
   useMantineColorScheme,
 } from "@mantine/core";
-import { useRouter } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { profileQueryOptions } from "@/queries/profile/use-profile";
-import { signOut } from "@/actions/auth/signOut";
-import { useSettingsStore } from "@/stores/settingsStore";
-import { useIntl } from "@/hooks/useIntl";
 import {
   IconSettings,
   IconLogout,
@@ -26,6 +26,9 @@ import {
   IconCalendar,
   IconTarget,
 } from "@tabler/icons-react";
+
+import { profileQueryOptions, profileQueryKey } from "@/queries/profile/use-profile";
+import { signOut } from "@/actions/auth/signOut";
 import { DarkSchemeIcon } from "@/components/Scheme/DarkScheme";
 import { LightSchemeIcon } from "@/components/Scheme/LightScheme";
 
@@ -36,10 +39,12 @@ export function UserMenu() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
   const { data: profile } = useQuery(profileQueryOptions);
+  const queryClient = useQueryClient();
 
   const handleSignOut = async () => {
     try {
       await signOut();
+      queryClient.setQueryData(profileQueryKey, undefined);
       router.navigate({ to: "/" });
       router.invalidate();
     } catch (error) {

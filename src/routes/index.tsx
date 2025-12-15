@@ -14,7 +14,6 @@ import {
   Badge,
   Divider,
 } from "@mantine/core";
-import { useState } from "react";
 import {
   IconClock,
   IconCalendar,

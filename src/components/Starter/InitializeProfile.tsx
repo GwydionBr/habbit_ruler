@@ -7,21 +7,36 @@ import { useOtherProfiles, useProfile } from "@/queries/profile/use-profile";
 import { useUpdateProfile } from "@/queries/profile/use-update-profile";
 
 import {
-  Card,
   Text,
   TextInput,
   Button,
-  Modal,
   Group,
   Stack,
   Select,
+  Title,
+  Box,
+  Container,
+  Paper,
+  ThemeIcon,
+  Divider,
+  Progress,
+  rem,
+  ColorSwatch,
+  MantineColor,
 } from "@mantine/core";
-import { IconArrowRight, IconCheck, IconUser } from "@tabler/icons-react";
+import {
+  IconArrowRight,
+  IconCheck,
+  IconUser,
+  IconWorld,
+  IconClock,
+  IconSparkles,
+} from "@tabler/icons-react";
 import { useForm } from "@mantine/form";
 import { Locale } from "@/types/settings.types";
 import ReactCountryFlag from "react-country-flag";
 import { locales } from "@/constants/settings";
-
+import { getGradientForColor, mantineColors } from "@/constants/colors";
 
 export default function InitializeProfile() {
   const router = useRouter();
@@ -34,7 +49,7 @@ export default function InitializeProfile() {
   });
   const { data: otherProfiles } = useOtherProfiles();
 
-  const { locale, format_24h, setSettingState, primaryColor } =
+  const { locale, format_24h, setSettingState, primaryColor, setPrimaryColor } =
     useSettingsStore();
   const { getLocalizedText } = useIntl();
 
@@ -97,124 +112,288 @@ export default function InitializeProfile() {
     !form.errors.username && form.values.username.length >= 3;
   const isOldUsername = profile.username === form.values.username;
 
+  // Calculate form completion percentage
+  const totalFields = 3;
+  let completedFields = 0;
+  if (form.values.name) completedFields++;
+  if (form.values.surname) completedFields++;
+  if (isUsernameValid && !isOldUsername) completedFields++;
+  const progressPercentage = (completedFields / totalFields) * 100;
+
+  const gradient = getGradientForColor(primaryColor);
+
   return (
-    <Stack align="center" justify="center" h="100vh">
-      <Card
-        withBorder
-        style={{
-          border: `2px solid light-dark(var(--mantine-color-${primaryColor}-3), var(--mantine-color-${primaryColor}-7))`,
-        }}
-      >
-        <Stack>
-          <Text>
-            {getLocalizedText(
-              "Fülle die folgenden Informationen aus, um zu starten.",
-              "Fill in the following information to get started."
-            )}
-          </Text>
-          <Group grow>
-            <Select
-              data={locales}
-              label={getLocalizedText("Sprache", "Language")}
-              placeholder={getLocalizedText(
-                "Sprache auswählen",
-                "Select Language"
-              )}
-              value={locale}
-              allowDeselect={false}
-              onChange={(value) => setSettingState({ locale: value as Locale })}
-              leftSection={
-                currentLocale && (
-                  <ReactCountryFlag
-                    countryCode={currentLocale.flag}
-                    svg
-                    style={{ width: "1.2em", height: "1.2em" }}
-                  />
-                )
-              }
-              renderOption={({ option, ...others }) => {
-                const localeData = locales.find(
-                  (l) => l.value === option.value
-                );
-                return (
-                  <div {...others}>
-                    <Group gap="xs">
-                      <ReactCountryFlag
-                        countryCode={localeData?.flag || "US"}
-                        svg
-                        style={{ width: "1.2em", height: "1.2em" }}
-                      />
-                      <Text>{option.label}</Text>
-                    </Group>
-                  </div>
-                );
-              }}
-            />
-            <Select
-              data={[
-                { value: "24h", label: "24h" },
-                { value: "12h", label: "12h" },
-              ]}
-              label={getLocalizedText("Zeitformat", "Time Format")}
-              placeholder={getLocalizedText(
-                "Zeitformat auswählen",
-                "Select Time Format"
-              )}
-              value={format_24h ? "24h" : "12h"}
-              onChange={(value) =>
-                setSettingState({ format_24h: value === "24h" })
-              }
-            />
+    <Box
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: rem(20),
+      }}
+    >
+      <Container size="lg" w="100%" maw={1000}>
+        <Stack gap="lg">
+          {/* Welcome Header */}
+          <Group justify="center" align="center" wrap="nowrap">
+            <ThemeIcon
+              size={65}
+              radius="xl"
+              variant="gradient"
+              gradient={getGradientForColor(primaryColor)}
+            >
+              <IconSparkles size={32} stroke={2} />
+            </ThemeIcon>
+            <div>
+              <Title
+                order={1}
+                style={{
+                  fontSize: rem(34),
+                  fontWeight: 800,
+                  lineHeight: 1.2,
+                }}
+                c={primaryColor}
+              >
+                {getLocalizedText("Willkommen!", "Welcome!")}
+              </Title>
+              <Text size="md" c="dimmed" mt={4}>
+                {getLocalizedText(
+                  "Lass uns dein Profil einrichten.",
+                  "Let's set up your profile."
+                )}
+              </Text>
+            </div>
           </Group>
-          <form onSubmit={form.onSubmit(handleSubmit)}>
-            <Stack>
-              <TextInput
-                label={getLocalizedText("Name", "Name")}
-                {...form.getInputProps("name")}
-              />
-              <TextInput
-                label={getLocalizedText("Nachname", "Surname")}
-                {...form.getInputProps("surname")}
-              />
-              <Stack gap="md">
-                <TextInput
-                  withAsterisk
-                  label={getLocalizedText("Neuer Benutzername", "New Username")}
-                  placeholder={getLocalizedText(
-                    "Gib einen neuen Benutzernamen ein (min. 3 Zeichen)",
-                    "Enter new username (min. 3 characters)"
-                  )}
-                  {...form.getInputProps("username")}
-                  rightSection={
-                    isUsernameValid && !isOldUsername ? (
-                      <IconCheck
-                        size={16}
-                        style={{
-                          color: "var(--mantine-color-green-6)",
-                        }}
+
+          {/* Progress Bar */}
+          <Box>
+            <Group justify="space-between" mb={8}>
+              <Text size="sm" fw={500} c="dimmed">
+                {getLocalizedText(
+                  "Profil vervollständigen",
+                  "Complete Profile"
+                )}
+              </Text>
+              <Text size="sm" fw={600}>
+                {completedFields}/{totalFields}
+              </Text>
+            </Group>
+            <Progress
+              value={progressPercentage}
+              color={primaryColor}
+              size="md"
+              radius="xl"
+              animated
+              striped={progressPercentage < 100}
+            />
+          </Box>
+
+          {/* Main Card */}
+          <Paper
+            shadow="xl"
+            radius="lg"
+            p="xl"
+            style={{
+              background:
+                "light-dark(var(--mantine-color-white), var(--mantine-color-dark-6))",
+              border: `2px solid light-dark(var(--mantine-color-${primaryColor}-2), var(--mantine-color-${primaryColor}-8))`,
+            }}
+          >
+            <Group align="flex-start" gap="xl" wrap="nowrap">
+              {/* Settings Section */}
+              <Stack gap="md" style={{ flex: "0 0 42%" }}>
+                <Group gap="sm">
+                  <ThemeIcon size="md" variant="light" color={primaryColor}>
+                    <IconWorld size={18} />
+                  </ThemeIcon>
+                  <Text fw={600} size="md">
+                    {getLocalizedText("Einstellungen", "Settings")}
+                  </Text>
+                </Group>
+
+                <Stack gap="md">
+                  <Select
+                    size="md"
+                    data={locales}
+                    label={getLocalizedText("Sprache", "Language")}
+                    placeholder={getLocalizedText(
+                      "Sprache auswählen",
+                      "Select Language"
+                    )}
+                    value={locale}
+                    allowDeselect={false}
+                    onChange={(value) =>
+                      setSettingState({ locale: value as Locale })
+                    }
+                    leftSection={
+                      currentLocale && (
+                        <ReactCountryFlag
+                          countryCode={currentLocale.flag}
+                          svg
+                          style={{ width: "1.2em", height: "1.2em" }}
+                        />
+                      )
+                    }
+                    renderOption={({ option, ...others }) => {
+                      const localeData = locales.find(
+                        (l) => l.value === option.value
+                      );
+                      return (
+                        <div {...others}>
+                          <Group gap="xs">
+                            <ReactCountryFlag
+                              countryCode={localeData?.flag || "US"}
+                              svg
+                              style={{ width: "1.2em", height: "1.2em" }}
+                            />
+                            <Text>{option.label}</Text>
+                          </Group>
+                        </div>
+                      );
+                    }}
+                  />
+                  <Select
+                    size="md"
+                    data={[
+                      { value: "24h", label: "24h" },
+                      { value: "12h", label: "12h" },
+                    ]}
+                    label={getLocalizedText("Zeitformat", "Time Format")}
+                    placeholder={getLocalizedText(
+                      "Zeitformat auswählen",
+                      "Select Time Format"
+                    )}
+                    value={format_24h ? "24h" : "12h"}
+                    onChange={(value) =>
+                      setSettingState({ format_24h: value === "24h" })
+                    }
+                    leftSection={<IconClock size={18} />}
+                  />
+                  <Select
+                    size="md"
+                    data={mantineColors}
+                    label={getLocalizedText("Theme-Farbe", "Theme Color")}
+                    placeholder={getLocalizedText(
+                      "Farbe auswählen",
+                      "Select Color"
+                    )}
+                    value={primaryColor}
+                    allowDeselect={false}
+                    onChange={(value) => setPrimaryColor(value as MantineColor)}
+                    leftSection={
+                      <ColorSwatch
+                        color={`var(--mantine-color-${primaryColor}-6)`}
+                        size={18}
                       />
-                    ) : null
-                  }
-                />
-                <Button
-                  rightSection={<IconArrowRight size={16} />}
-                  type="submit"
-                  disabled={
-                    !isUsernameValid ||
-                    isUpdating ||
-                    isOldUsername ||
-                    !profile ||
-                    isProfilePending
-                  }
-                  loading={isUpdating}
-                >
-                  {getLocalizedText("Starten", "Get Started")}
-                </Button>
+                    }
+                    renderOption={({ option, ...others }) => (
+                      <div {...others}>
+                        <Group gap="xs">
+                          <ColorSwatch
+                            color={`var(--mantine-color-${option.value}-6)`}
+                            size={18}
+                          />
+                          <Text>{option.label}</Text>
+                        </Group>
+                      </div>
+                    )}
+                  />
+                </Stack>
+
+                <Text size="xs" c="dimmed" mt="xs">
+                  {getLocalizedText(
+                    "Du kannst diese Einstellungen später ändern.",
+                    "You can change these settings later."
+                  )}
+                </Text>
               </Stack>
-            </Stack>
-          </form>
+
+              <Divider orientation="vertical" />
+
+              {/* Profile Form */}
+              <form
+                onSubmit={form.onSubmit(handleSubmit)}
+                style={{ flex: "0 0 53%" }}
+              >
+                <Stack gap="md">
+                  <Group gap="sm">
+                    <ThemeIcon size="md" variant="light" color={primaryColor}>
+                      <IconUser size={18} />
+                    </ThemeIcon>
+                    <Text fw={600} size="md">
+                      {getLocalizedText(
+                        "Persönliche Informationen",
+                        "Personal Information"
+                      )}
+                    </Text>
+                  </Group>
+
+                  <Group grow>
+                    <TextInput
+                      size="md"
+                      label={getLocalizedText("Vorname", "First Name")}
+                      placeholder={getLocalizedText("Max", "John")}
+                      {...form.getInputProps("name")}
+                    />
+                    <TextInput
+                      size="md"
+                      label={getLocalizedText("Nachname", "Last Name")}
+                      placeholder={getLocalizedText("Mustermann", "Doe")}
+                      {...form.getInputProps("surname")}
+                    />
+                  </Group>
+
+                  <TextInput
+                    size="md"
+                    withAsterisk
+                    label={getLocalizedText("Benutzername", "Username")}
+                    placeholder={getLocalizedText(
+                      "Gib einen einzigartigen Benutzernamen ein",
+                      "Enter a unique username"
+                    )}
+                    description={getLocalizedText(
+                      "Mindestens 3 Zeichen",
+                      "At least 3 characters"
+                    )}
+                    {...form.getInputProps("username")}
+                    rightSection={
+                      isUsernameValid && !isOldUsername ? (
+                        <ThemeIcon color="green" variant="light" size="sm">
+                          <IconCheck size={16} />
+                        </ThemeIcon>
+                      ) : null
+                    }
+                  />
+
+                  <Button
+                    fullWidth
+                    size="lg"
+                    rightSection={<IconArrowRight size={20} />}
+                    type="submit"
+                    disabled={
+                      !isUsernameValid ||
+                      isUpdating ||
+                      isOldUsername ||
+                      !profile ||
+                      isProfilePending
+                    }
+                    loading={isUpdating}
+                    variant="gradient"
+                    gradient={{
+                      from: `${primaryColor}.5`,
+                      to: `${primaryColor}.7`,
+                      deg: 135,
+                    }}
+                    mt="md"
+                  >
+                    {getLocalizedText("Los geht's!", "Let's Go!")}
+                  </Button>
+                </Stack>
+              </form>
+            </Group>
+          </Paper>
         </Stack>
-      </Card>
-    </Stack>
+      </Container>
+    </Box>
   );
 }

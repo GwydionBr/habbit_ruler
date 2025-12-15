@@ -5,18 +5,19 @@ import { profileQueryOptions } from "@/queries/profile/use-profile";
 import { Shell } from "@/components/AppShell/Shell";
 
 export const Route = createFileRoute("/_app")({
-  beforeLoad: ({ context }) => {
+  beforeLoad: async ({ context }) => {
     if (!context.userId) {
       throw redirect({ to: "/auth" });
+    }
+    const profile =
+      await context.queryClient.ensureQueryData(profileQueryOptions);
+    if (!profile.initialized) {
+      throw redirect({ to: "/new-user" });
     }
   },
   loader: async ({ context }) => {
     const { queryClient } = context;
     await queryClient.ensureQueryData(settingsQueryOptions);
-    const profile = await queryClient.ensureQueryData(profileQueryOptions);
-    if (!profile.initialized) {
-      throw redirect({ to: "/new-user" });
-    }
   },
   component: AppLayout,
 });

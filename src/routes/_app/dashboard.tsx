@@ -12,7 +12,6 @@ import {
   Box,
   ActionIcon,
   Tooltip,
-  MantineColor,
   getThemeColor,
   useMantineTheme,
   alpha,

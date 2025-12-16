@@ -21,6 +21,9 @@ export default defineConfig({
     include: ["cookie"],
     exclude: ["@powersync/web", "@journeyapps/wa-sqlite"],
   },
+  worker: {
+    format: "es",
+  },
   resolve: {
     alias: [
       {

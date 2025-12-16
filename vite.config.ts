@@ -127,6 +127,9 @@ export default defineConfig({
     include: ["cookie"],
     exclude: ["@powersync/web", "@journeyapps/wa-sqlite"],
   },
+  ssr: {
+    noExternal: ["@tabler/icons-react"],
+  },
   worker: {
     format: "es",
   },

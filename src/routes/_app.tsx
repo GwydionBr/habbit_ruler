@@ -4,6 +4,7 @@ import { settingsQueryOptions } from "@/db/queries/settings/use-settings";
 import { profileQueryOptions } from "@/db/queries/profile/use-profile";
 import { Shell } from "@/components/AppShell/Shell";
 import { PowerSyncInitializer } from "@/components/PowerSyncInitializer";
+import { RoutePrefetcher } from "@/components/RoutePrefetcher";
 
 export const Route = createFileRoute("/_app")({
   beforeLoad: async ({ context }) => {
@@ -13,12 +14,20 @@ export const Route = createFileRoute("/_app")({
   },
   loader: async ({ context }) => {
     const { queryClient } = context;
-    const profile =
-      await context.queryClient.ensureQueryData(profileQueryOptions);
-    if (!profile.initialized) {
-      throw redirect({ to: "/new-user" });
+
+    try {
+      // Versuche Daten zu laden (funktioniert online und offline mit PowerSync)
+      const profile =
+        await context.queryClient.ensureQueryData(profileQueryOptions);
+      if (!profile.initialized) {
+        throw redirect({ to: "/new-user" });
+      }
+      await queryClient.ensureQueryData(settingsQueryOptions);
+    } catch (error) {
+      // Offline oder Fehler beim Laden → lasse trotzdem weiter navigieren
+      // PowerSync wird die Daten im Component laden
+      console.log("Loader failed, continuing anyway (offline mode):", error);
     }
-    await queryClient.ensureQueryData(settingsQueryOptions);
   },
   component: AppLayout,
 });
@@ -28,6 +37,7 @@ function AppLayout() {
     <>
       <PowerSyncInitializer />
       <SettingsSync />
+      <RoutePrefetcher />
       <Shell />
     </>
   );

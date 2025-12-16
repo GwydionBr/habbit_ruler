@@ -4,6 +4,7 @@ import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 
 import type { ReactNode } from "react";
+import { useEffect } from "react";
 import {
   Outlet,
   HeadContent,
@@ -42,16 +43,50 @@ const fetchSupabaseAuth = createServerFn({ method: "GET" }).handler(
   }
 );
 
+/**
+ * Client-seitiger Fallback für Auth-Prüfung (funktioniert offline)
+ */
+async function getClientAuth() {
+  if (typeof window === "undefined") {
+    return { userId: null, user: null };
+  }
+
+  try {
+    const { connector } = await import("@/db/powersync/db");
+    const {
+      data: { session },
+    } = await connector.client.auth.getSession();
+
+    return {
+      userId: session?.user?.id ?? null,
+      user: session?.user
+        ? {
+            id: session.user.id,
+            email: session.user.email,
+            userMetadata: session.user.user_metadata,
+          }
+        : null,
+    };
+  } catch (error) {
+    console.error("Error getting client auth:", error);
+    return { userId: null, user: null };
+  }
+}
+
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
   beforeLoad: async () => {
-    const { userId, user } = await fetchSupabaseAuth();
-
-    return {
-      userId,
-      user,
-    };
+    // Versuche zuerst Server-Auth (für SSR), fallback auf Client-Auth (für Offline)
+    try {
+      const { userId, user } = await fetchSupabaseAuth();
+      return { userId, user };
+    } catch (error) {
+      // Server nicht erreichbar (Offline) → nutze Client-Auth
+      console.log("Server auth unavailable, using client auth (offline mode)");
+      const { userId, user } = await getClientAuth();
+      return { userId, user };
+    }
   },
   head: () => ({
     meta: [
@@ -121,6 +156,32 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
     /** Put your mantine theme override here */
     primaryColor: primaryColor,
   });
+
+  // Service Worker registrieren für Offline-Support
+  useEffect(() => {
+    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+      // PWA Service Worker wird automatisch von vite-plugin-pwa registriert
+      // Hier können wir Updates überwachen
+      navigator.serviceWorker.ready.then((registration) => {
+        console.log("Service Worker registered and ready for offline support");
+
+        // Prüfe auf Updates
+        registration.update().catch((error) => {
+          console.error("Service Worker update check failed:", error);
+        });
+      });
+
+      // Überwache wenn die App offline geht
+      window.addEventListener("online", () => {
+        console.log("App is now online");
+      });
+
+      window.addEventListener("offline", () => {
+        console.log("App is now offline - using cached data");
+      });
+    }
+  }, []);
+
   return (
     <html suppressHydrationWarning>
       <head>

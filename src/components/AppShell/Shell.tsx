@@ -23,6 +23,7 @@ import {
   IconTarget,
 } from "@tabler/icons-react";
 import SettingsModal from "@/components/Settings/SettingsModal";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 
 export function Shell() {
   const {
@@ -112,6 +113,7 @@ export function Shell() {
         <Outlet />
       </AppShell.Main>
       <SettingsModal />
+      <OfflineIndicator />
     </AppShell>
   );
 }

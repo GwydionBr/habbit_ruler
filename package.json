@@ -14,7 +14,9 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
     "vite": "^7.2.6",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-plugin-pwa": "^1.2.0",
+    "vite-tsconfig-paths": "^5.1.4",
+    "workbox-window": "^7.4.0"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"

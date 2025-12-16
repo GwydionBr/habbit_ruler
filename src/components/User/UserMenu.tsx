@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useIntl } from "@/hooks/useIntl";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useNetwork } from "@mantine/hooks";
 
 import {
   Menu,
@@ -14,6 +15,7 @@ import {
   Badge,
   Box,
   useMantineColorScheme,
+  Indicator,
 } from "@mantine/core";
 import {
   IconSettings,
@@ -21,19 +23,21 @@ import {
   IconDashboard,
   IconKeyboard,
   IconHelp,
-  IconBriefcase,
-  IconCurrencyDollar,
-  IconCalendar,
-  IconTarget,
+  IconWifi,
+  IconWifiOff,
 } from "@tabler/icons-react";
 
-import { profileQueryOptions, profileQueryKey } from "@/queries/profile/use-profile";
+import {
+  profileQueryOptions,
+  profileQueryKey,
+} from "@/db/queries/profile/use-profile";
 import { signOut } from "@/actions/auth/signOut";
 import { DarkSchemeIcon } from "@/components/Scheme/DarkScheme";
 import { LightSchemeIcon } from "@/components/Scheme/LightScheme";
 
 export function UserMenu() {
   const router = useRouter();
+  const { online } = useNetwork();
   const { getLocalizedText, locale } = useIntl();
   const { setIsModalOpen } = useSettingsStore();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
@@ -70,16 +74,23 @@ export function UserMenu() {
       transitionProps={{ transition: "fade-down", duration: 200 }}
     >
       <Menu.Target>
-        <Button variant="transparent" style={{ padding: "0 8px" }}>
-          <Avatar
-            src={profile?.avatar_url || undefined}
-            color="violet"
-            radius="xl"
-            size="sm"
-          >
-            {profile?.full_name?.charAt(0).toUpperCase() || "U"}
-          </Avatar>
-        </Button>
+        <Indicator
+          offset={10}
+          position="top-end"
+          color={online ? "lime" : "red"}
+          size={10}
+        >
+          <Button variant="transparent" style={{ padding: "0 8px" }}>
+            <Avatar
+              src={profile?.avatar_url || undefined}
+              color="violet"
+              radius="xl"
+              size="sm"
+            >
+              {profile?.full_name?.charAt(0).toUpperCase() || "U"}
+            </Avatar>
+          </Button>
+        </Indicator>
       </Menu.Target>
 
       <Menu.Dropdown>
@@ -95,6 +106,15 @@ export function UserMenu() {
               {profile?.full_name?.charAt(0).toUpperCase() || "U"}
             </Avatar>
             <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+              <Badge
+                size="xs"
+                color={online ? "teal" : "red"}
+                rightSection={
+                  online ? <IconWifi size={16} /> : <IconWifiOff size={16} />
+                }
+              >
+                {online ? "Online" : "Offline"}
+              </Badge>
               <Text size="sm" fw={600} truncate>
                 {profile?.full_name || profile?.username || "User"}
               </Text>
@@ -127,61 +147,6 @@ export function UserMenu() {
           onClick={() => setIsModalOpen(true)}
         >
           {getLocalizedText("Einstellungen", "Settings")}
-        </Menu.Item>
-
-        <Menu.Divider />
-
-        {/* App Shortcuts */}
-        <Menu.Label>
-          {getLocalizedText("Schnellzugriff", "Quick Access")}
-        </Menu.Label>
-        <Menu.Item
-          leftSection={<IconBriefcase size={16} />}
-          component="a"
-          href="/work"
-          rightSection={
-            <Text size="xs" c="dimmed">
-              W
-            </Text>
-          }
-        >
-          {getLocalizedText("Arbeit", "Work")}
-        </Menu.Item>
-        <Menu.Item
-          leftSection={<IconCurrencyDollar size={16} />}
-          component="a"
-          href="/finance"
-          rightSection={
-            <Text size="xs" c="dimmed">
-              F
-            </Text>
-          }
-        >
-          {getLocalizedText("Finanzen", "Finance")}
-        </Menu.Item>
-        <Menu.Item
-          leftSection={<IconCalendar size={16} />}
-          component="a"
-          href="/calendar"
-          rightSection={
-            <Text size="xs" c="dimmed">
-              C
-            </Text>
-          }
-        >
-          {getLocalizedText("Kalender", "Calendar")}
-        </Menu.Item>
-        <Menu.Item
-          leftSection={<IconTarget size={16} />}
-          component="a"
-          href="/habbit-tracker"
-          rightSection={
-            <Text size="xs" c="dimmed">
-              H
-            </Text>
-          }
-        >
-          {getLocalizedText("Gewohnheiten", "Habits")}
         </Menu.Item>
 
         <Menu.Divider />

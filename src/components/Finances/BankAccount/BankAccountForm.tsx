@@ -6,7 +6,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import {
   useAddBankAccountMutation,
   useUpdateBankAccountMutation,
-} from "@/queries/finances/use-bank-account";
+} from "@/db/queries/finances/use-bank-account";
 
 import { Stack, Select, TextInput } from "@mantine/core";
 
@@ -19,7 +19,7 @@ import CustomNumberInput from "@/components/UI/CustomNumberInput";
 import UpdateButton from "@/components/UI/Buttons/UpdateButton";
 import CreateButton from "@/components/UI/Buttons/CreateButton";
 import CancelButton from "@/components/UI/Buttons/CancelButton";
-import { useSettings } from "@/queries/settings/use-settings";
+import { useSettings } from "@/db/queries/settings/use-settings";
 
 const schema = z.object({
   title: z.string().min(1, "Name is required"),

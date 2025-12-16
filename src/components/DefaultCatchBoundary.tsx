@@ -5,10 +5,22 @@ import {
   useMatch,
   useRouter,
 } from "@tanstack/react-router";
+import { useIntl } from "@/hooks/useIntl";
 import type { ErrorComponentProps } from "@tanstack/react-router";
+import {
+  Button,
+  Container,
+  Group,
+  Paper,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
+import { IconHome, IconRefresh, IconArrowLeft } from "@tabler/icons-react";
 
 export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
   const router = useRouter();
+  const { getLocalizedText } = useIntl();
   const isRoot = useMatch({
     strict: false,
     select: (state) => state.id === rootRouteId,
@@ -17,37 +29,69 @@ export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
   console.error(error);
 
   return (
-    <div className="min-w-0 flex-1 p-4 flex flex-col items-center justify-center gap-6">
-      <ErrorComponent error={error} />
-      <div className="flex gap-2 items-center flex-wrap">
-        <button
-          onClick={() => {
-            router.invalidate();
-          }}
-          className={`px-2 py-1 bg-gray-600 dark:bg-gray-700 rounded-sm text-white uppercase font-extrabold`}
-        >
-          Try Again
-        </button>
-        {isRoot ? (
-          <Link
-            to="/"
-            className={`px-2 py-1 bg-gray-600 dark:bg-gray-700 rounded-sm text-white uppercase font-extrabold`}
-          >
-            Home
-          </Link>
-        ) : (
-          <Link
-            to="/"
-            className={`px-2 py-1 bg-gray-600 dark:bg-gray-700 rounded-sm text-white uppercase font-extrabold`}
-            onClick={(e) => {
-              e.preventDefault();
-              window.history.back();
-            }}
-          >
-            Go Back
-          </Link>
-        )}
-      </div>
-    </div>
+    <Container size="md" py="xl">
+      <Stack
+        align="center"
+        gap="xl"
+        style={{ minHeight: "60vh" }}
+        justify="center"
+      >
+        <Paper shadow="md" p="xl" radius="md" withBorder w="100%">
+          <Stack gap="lg">
+            <Stack gap="xs" align="center">
+              <Title order={2} c="red">
+                {getLocalizedText(
+                  "Ein Fehler ist aufgetreten",
+                  "An error occurred"
+                )}
+              </Title>
+              <Text size="sm" c="dimmed">
+                {getLocalizedText(
+                  "Es tut uns leid, aber etwas ist schiefgelaufen.",
+                  "We're sorry, but something went wrong."
+                )}
+              </Text>
+            </Stack>
+
+            <ErrorComponent error={error} />
+
+            <Group justify="center" gap="sm" mt="md">
+              <Button
+                leftSection={<IconRefresh size={16} />}
+                onClick={() => {
+                  router.invalidate();
+                }}
+                variant="filled"
+              >
+                {getLocalizedText("Erneut versuchen", "Try again")}
+              </Button>
+              {isRoot ? (
+                <Button
+                  component={Link}
+                  to="/"
+                  leftSection={<IconHome size={16} />}
+                  variant="light"
+                >
+                  {getLocalizedText("Zur Startseite", "Go to the start page")}
+                </Button>
+              ) : (
+                <Button
+                  component={Link}
+                  to="/"
+                  leftSection={<IconArrowLeft size={16} />}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.history.back();
+                  }}
+                  variant="light"
+                >
+                  {getLocalizedText("Zurück", "Go back")}
+                </Button>
+              )}
+            </Group>
+          </Stack>
+        </Paper>
+      </Stack>
+    </Container>
   );
 }

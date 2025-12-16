@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useSettings } from "@/queries/settings/use-settings";
+import { useSettings } from "@/db/queries/settings/use-settings";
 import { useSettingsStore } from "@/stores/settingsStore";
 
 /**

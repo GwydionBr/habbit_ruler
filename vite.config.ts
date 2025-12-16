@@ -19,6 +19,7 @@ export default defineConfig({
   ],
   optimizeDeps: {
     include: ["cookie"],
+    exclude: ["@powersync/web", "@journeyapps/wa-sqlite"],
   },
   resolve: {
     alias: [

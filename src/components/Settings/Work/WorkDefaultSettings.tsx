@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useIntl } from "@/hooks/useIntl";
-import { useSettings } from "@/queries/settings/use-settings";
-import { useUpdateSettings } from "@/queries/settings/use-update-settings";
+import { useSettings } from "@/db/queries/settings/use-settings";
+import { useUpdateSettings } from "@/db/queries/settings/use-update-settings";
 
 import { Button, Group, NumberInput, Select, Switch } from "@mantine/core";
 
@@ -27,7 +27,11 @@ export default function WorkDefaultSettings() {
     updateSettings({ default_salary_amount: salaryAmount });
   }
 
-  const { default_salary_amount, default_project_hourly_payment, default_currency} = settings;
+  const {
+    default_salary_amount,
+    default_project_hourly_payment,
+    default_currency,
+  } = settings;
 
   return (
     <Group>
@@ -73,14 +77,18 @@ export default function WorkDefaultSettings() {
           "Select Salary Currency"
         )}
         value={default_currency}
-        onChange={(value) => updateSettings({ default_currency: value as Currency })}
+        onChange={(value) =>
+          updateSettings({ default_currency: value as Currency })
+        }
       />
       <Switch
         mt="lg"
         label={getLocalizedText("Stundenlohn", "Hourly Payment")}
         checked={default_project_hourly_payment}
         onChange={(event) =>
-          updateSettings({ default_project_hourly_payment: event.currentTarget.checked })
+          updateSettings({
+            default_project_hourly_payment: event.currentTarget.checked,
+          })
         }
       />
     </Group>

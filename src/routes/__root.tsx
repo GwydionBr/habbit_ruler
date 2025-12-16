@@ -105,25 +105,22 @@ export const Route = createRootRouteWithContext<{
 });
 
 function RootComponent() {
-  const { primaryColor } = useSettingsStore();
-  const theme = createTheme({
-    /** Put your mantine theme override here */
-    primaryColor: primaryColor,
-  });
-
   return (
     <RootDocument>
-      <MantineProvider theme={theme} defaultColorScheme="auto">
-        <ModalsProvider>
-          <Notifications />
-          <Outlet />
-        </ModalsProvider>
-      </MantineProvider>
+      <ModalsProvider>
+        <Notifications />
+        <Outlet />
+      </ModalsProvider>
     </RootDocument>
   );
 }
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+  const { primaryColor } = useSettingsStore();
+  const theme = createTheme({
+    /** Put your mantine theme override here */
+    primaryColor: primaryColor,
+  });
   return (
     <html suppressHydrationWarning>
       <head>
@@ -131,7 +128,9 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <MantineProvider theme={theme} defaultColorScheme="auto">
+          {children}
+        </MantineProvider>
         <ReactQueryDevtools />
         <TanStackRouterDevtools />
         <Scripts />

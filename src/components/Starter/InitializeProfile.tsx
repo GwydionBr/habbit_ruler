@@ -3,8 +3,8 @@
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useIntl } from "@/hooks/useIntl";
 import { useRouter } from "@tanstack/react-router";
-import { useOtherProfiles, useProfile } from "@/queries/profile/use-profile";
-import { useUpdateProfile } from "@/queries/profile/use-update-profile";
+import { useOtherProfiles, useProfile } from "@/db/queries/profile/use-profile";
+import { useUpdateProfile } from "@/db/queries/profile/use-update-profile";
 
 import {
   Text,

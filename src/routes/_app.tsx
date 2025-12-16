@@ -1,8 +1,9 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { SettingsSync } from "@/components/Settings/SettingsSync";
-import { settingsQueryOptions } from "@/queries/settings/use-settings";
-import { profileQueryOptions } from "@/queries/profile/use-profile";
+import { settingsQueryOptions } from "@/db/queries/settings/use-settings";
+import { profileQueryOptions } from "@/db/queries/profile/use-profile";
 import { Shell } from "@/components/AppShell/Shell";
+import { PowerSyncInitializer } from "@/components/PowerSyncInitializer";
 
 export const Route = createFileRoute("/_app")({
   beforeLoad: async ({ context }) => {
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/_app")({
 function AppLayout() {
   return (
     <>
+      <PowerSyncInitializer />
       <SettingsSync />
       <Shell />
     </>

@@ -14,7 +14,7 @@ import CancelButton from "@/components/UI/Buttons/CancelButton";
 import {
   useAddFinanceClientMutation,
   useUpdateFinanceClientMutation,
-} from "@/queries/finances/use-finance-client";
+} from "@/db/queries/finances/use-finance-client";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),

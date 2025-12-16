@@ -13,7 +13,7 @@ import { Tables } from "@/types/db.types";
 import {
   useAddFinanceCategoryMutation,
   useUpdateFinanceCategoryMutation,
-} from "@/queries/finances/use-finance-category";
+} from "@/db/queries/finances/use-finance-category";
 
 const schema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),

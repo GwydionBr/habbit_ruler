@@ -3,7 +3,7 @@
  * This demonstrates the various formatting functions available.
  */
 import { useIntl } from "@/hooks/useIntl";
-import { useUpdateSettings } from "@/queries/settings/use-update-settings";
+import { useUpdateSettings } from "@/db/queries/settings/use-update-settings";
 import { Stack, Text, Button, Group, Select } from "@mantine/core";
 import { Locale } from "@/types/settings.types";
 
@@ -27,7 +27,7 @@ export function IntlExample() {
   };
 
   const handleToggle24h = () => {
-    updateSettings.mutate({ format_24h: !intl.format24h });
+    updateSettings.mutate({ format_24h: !intl.format_24h });
   };
 
   return (
@@ -46,7 +46,7 @@ export function IntlExample() {
           w={200}
         />
         <Button onClick={handleToggle24h} variant="outline">
-          {intl.format24h ? "Switch to 12h" : "Switch to 24h"}
+          {intl.format_24h ? "Switch to 12h" : "Switch to 24h"}
         </Button>
       </Group>
 

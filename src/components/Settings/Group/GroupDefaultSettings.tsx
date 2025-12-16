@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useUpdateSettings } from "@/queries/settings/use-update-settings";
-import { useSettings } from "@/queries/settings/use-settings";
+import { useUpdateSettings } from "@/db/queries/settings/use-update-settings";
+import { useSettings } from "@/db/queries/settings/use-settings";
 import { useIntl } from "@/hooks/useIntl";
 
 import { Box, DEFAULT_THEME, Group, Popover, Text } from "@mantine/core";

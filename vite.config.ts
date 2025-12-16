@@ -43,7 +43,12 @@ export default defineConfig({
       },
       workbox: {
         // Cache-Strategien für verschiedene Assets
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
+        // WICHTIG: Keine HTML files precachen bei SSR!
+        globPatterns: ["**/*.{js,css,ico,png,svg,woff,woff2}"],
+        // Ignoriere HTML files beim Precaching (werden von SSR generiert)
+        globIgnores: ["**/*.html", "**/index.html"],
+        // Kein navigateFallback bei SSR - Pages werden vom Server gerendert
+        navigateFallback: null,
         // Maximale Cache-Größe erhöhen für bessere Offline-Erfahrung
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
         runtimeCaching: [
@@ -98,27 +103,27 @@ export default defineConfig({
             },
           },
           {
-            // Navigation Requests - für prefetched routes
+            // Navigation Requests - für SSR Pages
+            // Bei SSR: Network First (Server bevorzugen, Cache als Fallback)
             urlPattern: ({ request }) => request.mode === "navigate",
             handler: "NetworkFirst",
             options: {
-              cacheName: "pages",
+              cacheName: "ssr-pages",
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 Tage
+                maxAgeSeconds: 60 * 60 * 24, // 24 Stunden (kürzer bei SSR)
               },
-              networkTimeoutSeconds: 3,
+              networkTimeoutSeconds: 5, // Mehr Zeit für SSR
             },
           },
         ],
-        // Navigation Fallback für SPA
-        navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api/, /^\/_server/],
         // Cleanup alte Caches bei Update
         cleanupOutdatedCaches: true,
       },
       devOptions: {
-        enabled: true, // Service Worker auch in Dev-Mode aktivieren
+        // Dev-Mode: PWA deaktiviert um Probleme mit SSR zu vermeiden
+        // In Production wird der Service Worker korrekt generiert
+        enabled: false,
         type: "module",
       },
     }),

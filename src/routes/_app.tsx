@@ -26,7 +26,17 @@ export const Route = createFileRoute("/_app")({
     } catch (error) {
       // Offline oder Fehler beim Laden → lasse trotzdem weiter navigieren
       // PowerSync wird die Daten im Component laden
-      console.log("Loader failed, continuing anyway (offline mode):", error);
+
+      // Nur bei echten Fehlern loggen, nicht bei Redirects (Status 307)
+      if (error instanceof Response && error.status === 307) {
+        // Redirect - das ist OK, wird vom Router gehandhabt
+        throw error;
+      }
+
+      // Bei anderen Fehlern (z.B. offline): Weiter navigieren
+      console.debug(
+        "Loader: Using offline mode, data will load from PowerSync"
+      );
     }
   },
   component: AppLayout,

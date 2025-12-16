@@ -26,14 +26,16 @@ import {
   IconWifi,
   IconWifiOff,
 } from "@tabler/icons-react";
+import { Link } from "@tanstack/react-router";
 
 import {
   profileQueryOptions,
   profileQueryKey,
 } from "@/db/queries/profile/use-profile";
-import { signOut } from "@/actions/auth/signOut";
 import { DarkSchemeIcon } from "@/components/Scheme/DarkScheme";
 import { LightSchemeIcon } from "@/components/Scheme/LightScheme";
+
+import { signOut } from "@/actions/auth/signOut";
 
 export function UserMenu() {
   const router = useRouter();
@@ -137,8 +139,8 @@ export function UserMenu() {
         <Menu.Label>{getLocalizedText("Navigation", "Navigation")}</Menu.Label>
         <Menu.Item
           leftSection={<IconDashboard size={16} />}
-          component="a"
-          href="/dashboard"
+          component={Link}
+          to="/dashboard"
         >
           {getLocalizedText("Dashboard", "Dashboard")}
         </Menu.Item>

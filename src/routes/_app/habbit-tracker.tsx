@@ -1,8 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/_app/habbit-tracker')({
+export const Route = createFileRoute("/_app/habbit-tracker")({
   component: RouteComponent,
-})
+  ssr: false,
+});
 
 function RouteComponent() {
   return <div>Hello "/_dashboard/habbit-tracker"!</div>

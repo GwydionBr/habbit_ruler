@@ -31,6 +31,7 @@ import { getGradientForColor } from "@/constants/colors";
 
 export const Route = createFileRoute("/_app/dashboard")({
   component: Dashboard,
+  ssr: false,
 });
 
 function Dashboard() {

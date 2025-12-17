@@ -8,7 +8,7 @@ import { RoutePrefetcher } from "@/components/RoutePrefetcher";
 
 export const Route = createFileRoute("/_app")({
   beforeLoad: async ({ context }) => {
-    if (!context.userId) {
+    if (!context.user) {
       throw redirect({ to: "/auth" });
     }
   },

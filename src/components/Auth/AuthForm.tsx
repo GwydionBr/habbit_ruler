@@ -3,6 +3,7 @@ import { useForm } from "@mantine/form";
 import { upperFirst, useToggle } from "@mantine/hooks";
 import { useIntl } from "@/hooks/useIntl";
 import { useRouter } from "@tanstack/react-router";
+import { connector } from "@/db/powersync/db";
 
 import {
   Anchor,
@@ -47,6 +48,7 @@ export default function AuthenticationForm({
     try {
       if (type === "login") {
         await login({ data: values });
+        await connector.login(values.email, values.password);
       } else {
         await register({ data: values });
       }

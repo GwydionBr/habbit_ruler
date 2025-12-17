@@ -4,7 +4,7 @@ import AuthForm from "@/components/Auth/AuthForm";
 
 export const Route = createFileRoute("/auth/")({
   beforeLoad: ({ context }) => {
-    if (context.userId) {
+    if (context.user) {
       throw redirect({ to: "/dashboard" });
     }
   },

@@ -3,7 +3,7 @@ import InitializeProfile from "@/components/Starter/InitializeProfile";
 
 export const Route = createFileRoute("/new-user")({
   beforeLoad: ({ context }) => {
-    if (!context.userId) {
+    if (!context.user) {
       throw redirect({ to: "/auth" });
     }
   },

@@ -76,25 +76,25 @@ export class SupabaseConnector
     }
 
     // Erst versuchen, lokale Session zu bekommen
-    let sessionResponse = await this.client.auth.getSession();
+    const sessionResponse = await this.client.auth.getSession();
 
-    // Falls keine lokale Session existiert, vom Server holen
-    if (!sessionResponse.data.session) {
-      try {
-        const serverSession = await fetchSupabaseSession();
-        if (serverSession) {
-          // Server-Session im Client setzen
-          await this.client.auth.setSession({
-            access_token: serverSession.access_token,
-            refresh_token: serverSession.refresh_token,
-          });
-          // Aktualisierte Session abrufen
-          sessionResponse = await this.client.auth.getSession();
-        }
-      } catch (error) {
-        console.error("Failed to fetch session from server:", error);
-      }
-    }
+    // // Falls keine lokale Session existiert, vom Server holen
+    // if (!sessionResponse.data.session) {
+    //   try {
+    //     const serverSession = await fetchSupabaseSession();
+    //     if (serverSession) {
+    //       // Server-Session im Client setzen
+    //       await this.client.auth.setSession({
+    //         access_token: serverSession.access_token,
+    //         refresh_token: serverSession.refresh_token,
+    //       });
+    //       // Aktualisierte Session abrufen
+    //       sessionResponse = await this.client.auth.getSession();
+    //     }
+    //   } catch (error) {
+    //     console.error("Failed to fetch session from server:", error);
+    //   }
+    // }
 
     this.updateSession(sessionResponse.data.session);
 

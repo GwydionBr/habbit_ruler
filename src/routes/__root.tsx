@@ -17,61 +17,33 @@ import { Notifications } from "@mantine/notifications";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { QueryClient } from "@tanstack/react-query";
-import { createServerFn } from "@tanstack/react-start";
 import { DefaultCatchBoundary } from "@/components/DefaultCatchBoundary";
 import { NotFound } from "@/components/NotFound";
-import { getSupabaseServerClient } from "@/lib/supabaseServerClient";
 import useSettingsStore from "@/stores/settingsStore";
-
-const fetchSupabaseAuth = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const supabase = getSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    return {
-      userId: user?.id ?? null,
-      user: user
-        ? {
-            id: user.id,
-            email: user.email,
-            userMetadata: user.user_metadata,
-          }
-        : null,
-    };
-  }
-);
+import { fetchSupabaseAuth } from "@/actions/auth/fetchSupabaseAuth";
+import { createIsomorphicFn } from "@tanstack/react-start";
 
 /**
  * Client-seitiger Fallback für Auth-Prüfung (funktioniert offline)
  */
-async function getClientAuth() {
-  if (typeof window === "undefined") {
-    return { userId: null, user: null };
-  }
-
-  try {
-    const { connector } = await import("@/db/powersync/db");
-    const {
-      data: { session },
-    } = await connector.client.auth.getSession();
-
-    return {
-      userId: session?.user?.id ?? null,
-      user: session?.user
-        ? {
-            id: session.user.id,
-            email: session.user.email,
-            userMetadata: session.user.user_metadata,
-          }
-        : null,
-    };
-  } catch (error) {
-    console.error("Error getting client auth:", error);
-    return { userId: null, user: null };
-  }
-}
+const getClientAuth = createIsomorphicFn()
+  .server(async () => {
+    return { user: null };
+  })
+  .client(async () => {
+    try {
+      const { connector } = await import("@/db/powersync/db");
+      const {
+        data: { session },
+      } = await connector.client.auth.getSession();
+      return {
+        user: session?.user ?? null,
+      };
+    } catch (error) {
+      console.error("Error getting client auth:", error);
+      return { user: null };
+    }
+  });
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -79,13 +51,13 @@ export const Route = createRootRouteWithContext<{
   beforeLoad: async () => {
     // Versuche zuerst Server-Auth (für SSR), fallback auf Client-Auth (für Offline)
     try {
-      const { userId, user } = await fetchSupabaseAuth();
-      return { userId, user };
+      const user = await fetchSupabaseAuth();
+      return { user };
     } catch (error) {
       // Server nicht erreichbar (Offline) → nutze Client-Auth
       console.log("Server auth unavailable, using client auth (offline mode)");
-      const { userId, user } = await getClientAuth();
-      return { userId, user };
+      const user = await getClientAuth();
+      return { user };
     }
   },
   head: () => ({

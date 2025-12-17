@@ -78,7 +78,7 @@ const benefits = [
 ];
 
 function Home() {
-  const { userId } = Route.useRouteContext();
+  const { user } = Route.useRouteContext();
 
   return (
     <Box>
@@ -124,7 +124,7 @@ function Home() {
             </Box>
 
             <Group gap="md">
-              {userId ? (
+              {user ? (
                 <Button
                   component={Link}
                   to="/dashboard"
@@ -285,7 +285,7 @@ function Home() {
               Start today and experience how easy it can be to stay productive
               and organized.
             </Text>
-            {!userId && (
+            {!user && (
               <Button
                 size="xl"
                 variant="white"

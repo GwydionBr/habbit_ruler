@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
   public: {
     Tables: {
       appointment: {
@@ -62,6 +67,7 @@ export type Database = {
           saldo: number
           saldo_set_at: string
           title: string
+          user_id: string
         }
         Insert: {
           created_at?: string
@@ -71,6 +77,7 @@ export type Database = {
           saldo?: number
           saldo_set_at?: string
           title: string
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -80,6 +87,7 @@ export type Database = {
           saldo?: number
           saldo_set_at?: string
           title?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -674,6 +682,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      lists: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+        }
+        Relationships: []
       }
       old_payout_data: {
         Row: {
@@ -1441,6 +1470,47 @@ export type Database = {
           },
         ]
       }
+      todos: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          list_id: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          id?: string
+          list_id: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          list_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "todos_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1635,4 +1705,3 @@ export const Constants = {
     },
   },
 } as const
-

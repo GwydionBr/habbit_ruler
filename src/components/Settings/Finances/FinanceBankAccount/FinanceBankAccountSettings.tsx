@@ -1,8 +1,5 @@
 import { useIntl } from "@/hooks/useIntl";
-import {
-  useDeleteBankAccountMutation,
-  useBankAccountQuery,
-} from "@/db/queries/finances/use-bank-account";
+import { bankAccountsCollection, useBankAccounts } from "@/db/collections/finance/bank-account-collection";
 
 import { Group, Text } from "@mantine/core";
 import { IconBuildingBank, IconPlus } from "@tabler/icons-react";
@@ -12,9 +9,7 @@ import { BankAccount } from "@/types/finance.types";
 
 export default function FinanceBankAccountSettings() {
   const { getLocalizedText, getCurrencySymbol } = useIntl();
-  const { data: bankAccounts = [], isPending: isFetchingBankAccounts } =
-    useBankAccountQuery();
-  const { mutate: deleteBankAccountsMutation } = useDeleteBankAccountMutation();
+  const { data: bankAccounts } = useBankAccounts();
 
   const renderRowContent = (bankAccount: BankAccount) => (
     <>
@@ -45,14 +40,14 @@ export default function FinanceBankAccountSettings() {
   return (
     <FinanceSettingsList
       items={bankAccounts}
-      isLoading={isFetchingBankAccounts}
+      isLoading={false}
       getId={(item) => item.id}
       getTitle={(item) => item.title}
       getDescription={(item) => item.description || undefined}
       renderRowContent={renderRowContent}
       renderEditForm={renderEditForm}
       renderAddForm={renderAddForm}
-      onDelete={(ids) => deleteBankAccountsMutation({ data: ids })}
+      onDelete={(ids) => bankAccountsCollection.delete(ids)}
       titleText={getLocalizedText("Bankkonten", "Bank Accounts")}
       emptyText={getLocalizedText("Keine Konten gefunden", "No accounts found")}
       deleteTitle={getLocalizedText("Konto löschen", "Delete Account")}

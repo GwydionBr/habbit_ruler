@@ -1,9 +1,7 @@
 import { useForm } from "@mantine/form";
 import { useIntl } from "@/hooks/useIntl";
-import {
-  useAddBankAccountMutation,
-  useUpdateBankAccountMutation,
-} from "@/db/queries/finances/use-bank-account";
+import { bankAccountsCollection } from "@/db/collections/finance/bank-account-collection";
+import { useProfileStore } from "@/stores/profileStore";
 
 import { Stack, Select, TextInput } from "@mantine/core";
 
@@ -11,7 +9,7 @@ import { z } from "zod";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { currencies } from "@/constants/settings";
 import { Currency } from "@/types/settings.types";
-import { Tables } from "@/types/db.types";
+import { Database, Tables } from "@/types/db.types";
 import CustomNumberInput from "@/components/UI/CustomNumberInput";
 import UpdateButton from "@/components/UI/Buttons/UpdateButton";
 import CreateButton from "@/components/UI/Buttons/CreateButton";
@@ -40,22 +38,8 @@ export default function BankAccountForm({
 }: BankAccountFormProps) {
   const { getLocalizedText } = useIntl();
   const { data: settings } = useSettings();
-  const { mutate: addBankAccountMutation, isPending: isAddingBankAccount } =
-    useAddBankAccountMutation({
-      onSuccess: (bankAccount) => {
-        onSuccess?.(bankAccount);
-        handleClose();
-      },
-    });
-  const {
-    mutate: updateBankAccountMutation,
-    isPending: isUpdatingBankAccount,
-  } = useUpdateBankAccountMutation({
-    onSuccess: (bankAccount) => {
-      onSuccess?.(bankAccount);
-      handleClose();
-    },
-  });
+  const { id: userId } = useProfileStore();
+
   const form = useForm({
     initialValues: {
       title: bankAccount?.title || "",
@@ -74,19 +58,26 @@ export default function BankAccountForm({
 
   function handleSubmit(values: z.infer<typeof schema>) {
     if (bankAccount) {
-      updateBankAccountMutation({
-        data: {
-          id: bankAccount.id,
-          ...values,
-        },
+      bankAccountsCollection.update(bankAccount.id, (draft) => {
+        draft.title = values.title;
+        draft.description = values.description || null;
+        draft.currency =
+          values.currency as Database["public"]["Enums"]["currency"];
+        draft.saldo = values.saldo;
       });
     } else {
-      addBankAccountMutation({
-        data: {
-          ...values,
-        },
+      bankAccountsCollection.insert({
+        id: crypto.randomUUID(),
+        created_at: new Date().toISOString(),
+        saldo_set_at: new Date().toISOString(),
+        user_id: userId,
+        title: values.title,
+        description: values.description || null,
+        currency: values.currency as Database["public"]["Enums"]["currency"],
+        saldo: values.saldo,
       });
     }
+    handleClose();
   }
 
   return (
@@ -118,13 +109,11 @@ export default function BankAccountForm({
             type="submit"
             onClick={form.onSubmit(handleSubmit)}
             title={getLocalizedText("Konto aktualisieren", "Update account")}
-            loading={isUpdatingBankAccount}
           />
         ) : (
           <CreateButton
             type="submit"
             onClick={form.onSubmit(handleSubmit)}
-            loading={isAddingBankAccount}
             title={getLocalizedText("Konto erstellen", "Create account")}
           />
         )}

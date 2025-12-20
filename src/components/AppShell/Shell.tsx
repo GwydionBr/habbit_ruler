@@ -24,7 +24,7 @@ export function Shell() {
         <Header />
       </AppShell.Header>
 
-      <AppShell.Main>
+      <AppShell.Main style={{ transition: "0.4s ease-in" }}>
         <Outlet />
       </AppShell.Main>
       <AppShell.Aside

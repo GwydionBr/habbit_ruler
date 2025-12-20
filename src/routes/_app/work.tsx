@@ -1,14 +1,15 @@
+import { useEffect } from "react";
+import { useWorkStore } from "@/stores/workManagerStore";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
-import { Box } from "@mantine/core";
-import { z } from "zod";
-import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { useSettingsStore } from "@/stores/settingsStore";
+
+import { Box } from "@mantine/core";
 import WorkInitializer from "@/components/Work/WorkInitializer";
 import ProjectNavbar from "@/components/Navbar/ProjectNavbar";
 import ProjectDetail from "@/components/Work/Project/ProjectDetail";
-import { useEffect } from "react";
-import { useWorkStore } from "@/stores/workManagerStore";
+import { z } from "zod";
+import { fallback, zodValidator } from "@tanstack/zod-adapter";
 
 const workSearchSchema = z.object({
   projectId: fallback(z.string(), "").default(""),

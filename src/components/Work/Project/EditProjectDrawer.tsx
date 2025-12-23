@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState, useMemo } from "react";
 import { useWorkStore } from "@/stores/workManagerStore";
 import { workProjectsCollection, useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
@@ -157,8 +155,8 @@ export default function EditProjectDrawer({
         >
           <FinanceCategoryForm
             onClose={() => drawersStack.close("category-form")}
-            onSuccess={(category) =>
-              setCategoryIds([...categoryIds, category.id])
+            onSuccess={(categoryId) =>
+              setCategoryIds([...categoryIds, categoryId])
             }
           />
         </Drawer>

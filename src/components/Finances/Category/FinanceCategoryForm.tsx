@@ -4,7 +4,7 @@ import { useProfileStore } from "@/stores/profileStore";
 
 import { TextInput, Stack, Textarea } from "@mantine/core";
 import { z } from "zod";
-import { zod4Resolver } from "mantine-form-zod-resolver";
+import { zodResolver } from "mantine-form-zod-resolver";
 import CancelButton from "@/components/UI/Buttons/CancelButton";
 import CreateButton from "@/components/UI/Buttons/CreateButton";
 import UpdateButton from "@/components/UI/Buttons/UpdateButton";
@@ -18,7 +18,7 @@ const schema = z.object({
 
 interface FinanceCategoryFormProps {
   onClose?: () => void;
-  onSuccess?: (category: Tables<"finance_category">) => void;
+  onSuccess?: (categoryId: string) => void;
   category?: Tables<"finance_category"> | null;
 }
 
@@ -35,7 +35,7 @@ export default function FinanceCategoryForm({
       title: category?.title || "",
       description: category?.description || "",
     },
-    validate: zod4Resolver(schema),
+    validate: zodResolver(schema),
   });
 
   const handleClose = () => {
@@ -43,23 +43,28 @@ export default function FinanceCategoryForm({
     onClose?.();
   };
 
-  function handleFormSubmit(values: z.infer<typeof schema>) {
+  async function handleFormSubmit(values: z.infer<typeof schema>) {
     if (category) {
-      financeCategoriesCollection.update(
+      const newTX = financeCategoriesCollection.update(
         category.id,
         (draft) => {
           draft.title = values.title;
           draft.description = values.description || null;
         }
       );
+      await newTX.isPersisted.promise
+      onSuccess?.(category.id);
     } else {
-      financeCategoriesCollection.insert({
-        id: crypto.randomUUID(),
+      const newId = crypto.randomUUID();
+      const newTX = financeCategoriesCollection.insert({
+        id: newId,
         created_at: new Date().toISOString(),
         user_id: userId,
         title: values.title,
         description: values.description || null,
       });
+      await newTX.isPersisted.promise
+      onSuccess?.(newId);
     }
     handleClose();
   }

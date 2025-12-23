@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { useIntl } from "@/hooks/useIntl";
+import { useRouter } from "@tanstack/react-router";
 
 import { Modal, useModalsStack } from "@mantine/core";
 import ProjectForm from "./ProjectForm";
 import FinanceCategoryForm from "@/components/Finances/Category/FinanceCategoryForm";
-
-import { Tables } from "@/types/db.types";
 
 interface NewProjectModalProps {
   opened: boolean;
@@ -19,6 +18,7 @@ export default function NewProjectModal({
   const { getLocalizedText } = useIntl();
   const stack = useModalsStack(["project-form", "category-form"]);
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     if (opened) {
@@ -28,10 +28,13 @@ export default function NewProjectModal({
     }
   }, [opened]);
 
-  const handleSuccess = (project: Tables<"timer_project">) => {
+  const handleSuccess = (projectId: string) => {
+    router.navigate({
+      to: "/work",
+      search: { projectId },
+    });
     onClose();
     setCategoryIds([]);
-    // TODO: Navigate to project details page
   };
 
   return (
@@ -58,8 +61,8 @@ export default function NewProjectModal({
       >
         <FinanceCategoryForm
           onClose={() => stack.close("category-form")}
-          onSuccess={(category) =>
-            setCategoryIds([...categoryIds, category.id])
+          onSuccess={(categoryId) =>
+            setCategoryIds([...categoryIds, categoryId])
           }
         />
       </Modal>

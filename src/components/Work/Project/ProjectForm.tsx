@@ -53,7 +53,7 @@ import CustomNumberInput from "@/components/UI/CustomNumberInput";
 
 interface ProjectFormProps {
   project?: WorkProject;
-  onSuccess?: (project: Tables<"timer_project">) => void;
+  onSuccess?: (projectId: string) => void;
   onCancel?: () => void;
   categoryIds: string[];
   setCategoryIds: (categoryIds: string[]) => void;
@@ -197,7 +197,7 @@ export default function ProjectForm({
     }
   };
 
-  const handleSubmit = (values: z.infer<typeof schema>) => {
+  const handleSubmit = async (values: z.infer<typeof schema>) => {
     const { cash_flow_category_ids, ...cleanValues } = values;
     if (project) {
       const updatedProject: UpdateWorkProject = {
@@ -215,7 +215,7 @@ export default function ProjectForm({
         updatedProject.round_in_time_fragments = null;
         updatedProject.time_fragment_interval = null;
       }
-      workProjectsCollection.update(project.id, (draft) => {
+      const newTX = workProjectsCollection.update(project.id, (draft) => {
         draft.title = updatedProject.title || "";
         draft.description = updatedProject.description || "";
         draft.salary = updatedProject.salary || 0;
@@ -228,7 +228,8 @@ export default function ProjectForm({
         draft.round_in_time_fragments =
           updatedProject.round_in_time_fragments || null;
       });
-      onSuccess;
+      await newTX.isPersisted.promise
+      onSuccess?.(project.id);
     } else {
       const newProject: InsertWorkProject = {
         ...cleanValues,
@@ -244,8 +245,9 @@ export default function ProjectForm({
         newProject.round_in_time_fragments = null;
         newProject.time_fragment_interval = null;
       }
-      workProjectsCollection.insert({
-        id: crypto.randomUUID(),
+      const newId = crypto.randomUUID();
+      const newTX = workProjectsCollection.insert({
+        id: newId,
         created_at: new Date().toISOString(),
         user_id: userId,
         cash_flow_category_id: newProject.cash_flow_category_id || null,
@@ -265,7 +267,8 @@ export default function ProjectForm({
         folder_id: null,
         finance_project_id: null,
       });
-      onSuccess;
+      await newTX.isPersisted.promise
+      onSuccess?.(newId);
     }
   };
 

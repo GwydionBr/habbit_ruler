@@ -1,27 +1,26 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { workTimeEntriesCollection } from "@/db/collections/work/work-time-entry/work-time-entry-collection";
 import { useSettings } from "@/db/collections/settings/settings-collection";
-import { useSettingsStore } from "@/stores/settingsStore";
 import { useIntl } from "@/hooks/useIntl";
+import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
 
 import { Drawer, Flex, Group, Text, useDrawersStack, Box } from "@mantine/core";
 import { IconExclamationMark } from "@tabler/icons-react";
 import SessionForm from "@/components/Work/Session/SessionForm";
-
-import { Currency } from "@/types/settings.types";
-import { Tables } from "@/types/db.types";
 import DeleteActionIcon from "@/components/UI/ActionIcons/DeleteActionIcon";
 import CancelButton from "@/components/UI/Buttons/CancelButton";
 import DeleteButton from "@/components/UI/Buttons/DeleteButton";
 import ProjectForm from "../Project/ProjectForm";
-import { TimerRoundingSettings } from "@/types/timeTracker.types";
 import FinanceCategoryForm from "@/components/Finances/Category/FinanceCategoryForm";
+
+import { Currency } from "@/types/settings.types";
+import { Tables } from "@/types/db.types";
+import { TimerRoundingSettings } from "@/types/timeTracker.types";
+import { WorkProject } from "@/types/work.types";
 
 interface TimerSessionModalProps {
   timerSession: Tables<"timer_session">;
-  project: Tables<"timer_project">;
+  project: WorkProject;
   opened: boolean;
   onClose: () => void;
 }
@@ -35,8 +34,8 @@ export default function EditSessionDrawer({
   const { data: settings } = useSettings();
   const { getLocalizedText } = useIntl();
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
-  const [currentProject, setCurrentProject] =
-    useState<Tables<"timer_project">>(project);
+  const [currentProject, setCurrentProject] = useState<WorkProject>(project);
+  const workProjects = useWorkProjects();
 
   const drawerStack = useDrawersStack([
     "edit-session",
@@ -82,16 +81,17 @@ export default function EditSessionDrawer({
       roundInTimeFragments:
         currentProject.round_in_time_fragments !== null
           ? currentProject.round_in_time_fragments
-          : settings?.round_in_time_sections ?? false,
+          : (settings?.round_in_time_sections ?? false),
       timeFragmentInterval:
         currentProject.time_fragment_interval ??
-        settings?.time_section_interval ?? 10,
+        settings?.time_section_interval ??
+        10,
       roundingInterval:
-        currentProject.rounding_interval ??
-        settings?.rounding_interval ?? 1,
+        currentProject.rounding_interval ?? settings?.rounding_interval ?? 1,
       roundingDirection:
         currentProject.rounding_direction ??
-        settings?.rounding_direction ?? "up",
+        settings?.rounding_direction ??
+        "up",
     };
 
     // updateWorkTimeEntryMutation({
@@ -173,7 +173,11 @@ export default function EditSessionDrawer({
             onCancel={() => drawerStack.close("add-project")}
             categoryIds={categoryIds}
             setCategoryIds={setCategoryIds}
-            onSuccess={(project) => setCurrentProject(project)}
+            onSuccess={(projectId) =>
+              setCurrentProject(
+                workProjects.find((p) => p.id === projectId) ?? project
+              )
+            }
             onOpenCategoryForm={() => drawerStack.open("category-form")}
           />
         </Drawer>
@@ -184,8 +188,8 @@ export default function EditSessionDrawer({
         >
           <FinanceCategoryForm
             onClose={() => drawerStack.close("category-form")}
-            onSuccess={(category) =>
-              setCategoryIds([...categoryIds, category.id])
+            onSuccess={(categoryId: string) =>
+              setCategoryIds([...categoryIds, categoryId])
             }
           />
         </Drawer>

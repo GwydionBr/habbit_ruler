@@ -1,11 +1,9 @@
-"use client";
-
 import { useState, useEffect } from "react";
-import { useSettingsStore } from "@/stores/settingsStore";
 import { useIntl } from "@/hooks/useIntl";
 import { workTimeEntriesCollection } from "@/db/collections/work/work-time-entry/work-time-entry-collection";
 import { useSettings } from "@/db/collections/settings/settings-collection";
 import { useProfileStore } from "@/stores/profileStore";
+import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
 
 import { Group, Modal, Text, useModalsStack } from "@mantine/core";
 import SessionForm from "./SessionForm";
@@ -16,12 +14,13 @@ import { IconClockPlus } from "@tabler/icons-react";
 import { NewSession } from "@/types/timerSession.types";
 import { TimerRoundingSettings } from "@/types/timeTracker.types";
 import FinanceCategoryForm from "@/components/Finances/Category/FinanceCategoryForm";
+import { WorkProject } from "@/types/work.types";
 
 interface NewSessionModalProps {
   opened: boolean;
   onClose: () => void;
   initialValues?: NewSession;
-  project?: Tables<"timer_project">;
+  project?: WorkProject;
 }
 
 export default function NewSessionModal({
@@ -38,10 +37,11 @@ export default function NewSessionModal({
   ]);
   const { data: settings } = useSettings();
   const { id: userId } = useProfileStore();
+  const workProjects = useWorkProjects();
 
-  const [currentProject, setCurrentProject] = useState<
-    Tables<"timer_project"> | undefined
-  >(project);
+  const [currentProject, setCurrentProject] = useState<WorkProject | undefined>(
+    project
+  );
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -131,6 +131,7 @@ export default function NewSessionModal({
         settings?.time_section_interval ??
         10,
     });
+    onClose();
   }
 
   return (
@@ -180,8 +181,8 @@ export default function NewSessionModal({
           categoryIds={categoryIds}
           setCategoryIds={setCategoryIds}
           onOpenCategoryForm={() => stack.open("category-form")}
-          onSuccess={(project) => {
-            setCurrentProject(project);
+          onSuccess={(projectId: string) => {
+            setCurrentProject(workProjects.find((p) => p.id === projectId));
             stack.close("project-form");
           }}
         />
@@ -194,8 +195,8 @@ export default function NewSessionModal({
       >
         <FinanceCategoryForm
           onClose={() => stack.close("category-form")}
-          onSuccess={(category) =>
-            setCategoryIds([...categoryIds, category.id])
+          onSuccess={(categoryId: string) =>
+            setCategoryIds([...categoryIds, categoryId])
           }
         />
       </Modal>

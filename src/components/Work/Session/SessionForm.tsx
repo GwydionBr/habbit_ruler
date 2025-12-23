@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect, useMemo } from "react";
 import { useForm } from "@mantine/form";
 import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
@@ -24,16 +22,16 @@ import UpdateButton from "@/components/UI/Buttons/UpdateButton";
 import CreateButton from "@/components/UI/Buttons/CreateButton";
 import LocaleDateTimePicker from "@/components/UI/Locale/LocaleDateTimePicker";
 
-import { Tables } from "@/types/db.types";
 import { NewSession } from "@/types/timerSession.types";
 import CustomNumberInput from "@/components/UI/CustomNumberInput";
+import { WorkProject } from "@/types/work.types";
 
 interface SessionFormProps {
   initialValues: NewSession;
   newSession: boolean;
-  project?: Tables<"timer_project">;
+  project?: WorkProject;
   submitting?: boolean;
-  onProjectChange?: (value: Tables<"timer_project">) => void;
+  onProjectChange?: (value: WorkProject) => void;
   onSubmit: (values: NewSession) => void;
   onCancel: () => void;
   onOpenProjectForm?: () => void;

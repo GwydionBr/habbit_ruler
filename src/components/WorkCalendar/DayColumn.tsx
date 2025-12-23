@@ -131,7 +131,7 @@ export function DayColumn({
           borderRadius: 0,
           background: isToday(day)
             ? "light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4))"
-            : "light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-7))",
+            : "",
           overflow: "hidden",
         }}
       >

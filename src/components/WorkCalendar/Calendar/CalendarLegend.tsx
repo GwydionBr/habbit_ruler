@@ -26,7 +26,7 @@ export default function CalendarLegend({
       p={5}
       w="100%"
       style={{
-        position: "sticky",
+        position: "absolute",
         bottom: 0,
         zIndex: 100,
         background: "var(--mantine-color-body)",

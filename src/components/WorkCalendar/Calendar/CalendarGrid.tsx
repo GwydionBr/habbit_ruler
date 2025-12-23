@@ -131,7 +131,7 @@ export default function CalendarGrid({
           bg="var(--mantine-color-body)"
           style={{
             position: "sticky",
-            top: 65,
+            top: 0,
             zIndex: 20,
             borderBottom:
               "2px solid light-dark(var(--mantine-color-gray-9), var(--mantine-color-dark-0))",

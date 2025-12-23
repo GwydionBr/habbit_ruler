@@ -1,7 +1,5 @@
-"use client";
-
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useDisclosure, useHotkeys } from "@mantine/hooks";
+import { useDisclosure, useHotkeys, usePrevious } from "@mantine/hooks";
 import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
 import { useWorkTimeEntries } from "@/db/collections/work/work-time-entry/work-time-entry-collection";
 import { useAppointments } from "@/db/collections/work/appointment/appointment-collection";
@@ -11,7 +9,6 @@ import { ScrollArea, Stack } from "@mantine/core";
 import CalendarGrid from "./Calendar/CalendarGrid";
 // import EditSessionDrawer from "@/components/Work/Session/EditSessionDrawer";
 import CalendarLegend from "./Calendar/CalendarLegend";
-import CalendarHeader from "./Calendar/CalendarHeader";
 
 import { getStartOfDay } from "./calendarUtils";
 import { addDays, differenceInCalendarDays } from "date-fns";
@@ -54,7 +51,8 @@ export default function WorkCalendar() {
   });
   const [drawerOpened, { open, close }] = useDisclosure(false);
   const viewport = useRef<HTMLDivElement>(null);
-
+  const previousZoomIndex = usePrevious(zoomIndex);
+  
   useHotkeys([
     [
       "Escape",
@@ -226,15 +224,17 @@ export default function WorkCalendar() {
     }
   }, [viewportTop, viewport.current]);
 
-  function handleZoomChange(oldIndex: number, newIndex: number) {
-    if (viewport.current) {
+  // This effect is used to keep the viewport top position when the zoom index changes
+  // Is used instead of handleZoomChange in CalendarHeader
+  useEffect(() => {
+    if (viewport.current && previousZoomIndex) {
       const currentTimeTop =
         (viewport.current.scrollTop - 50) /
-        (rasterHeight * zoomLevel[oldIndex]);
+        (rasterHeight * zoomLevel[previousZoomIndex]);
 
       const roundedTimeTop = Math.round(currentTimeTop * 100) / 100;
 
-      const newTop = roundedTimeTop * rasterHeight * zoomLevel[newIndex] + 50;
+      const newTop = roundedTimeTop * rasterHeight * zoomLevel[zoomIndex] + 50;
 
       setViewportTop((prev) => ({
         old: prev.new,
@@ -242,7 +242,25 @@ export default function WorkCalendar() {
         isSmooth: false,
       }));
     }
-  }
+  }, [zoomIndex]);
+
+  // function handleZoomChange(oldIndex: number, newIndex: number) {
+  //   if (viewport.current) {
+  //     const currentTimeTop =
+  //       (viewport.current.scrollTop - 50) /
+  //       (rasterHeight * zoomLevel[oldIndex]);
+
+  //     const roundedTimeTop = Math.round(currentTimeTop * 100) / 100;
+
+  //     const newTop = roundedTimeTop * rasterHeight * zoomLevel[newIndex] + 50;
+
+  //     setViewportTop((prev) => ({
+  //       old: prev.new,
+  //       new: newTop,
+  //       isSmooth: false,
+  //     }));
+  //   }
+  // }
 
   function handleScrollToNow() {
     if (viewport.current) {
@@ -255,12 +273,12 @@ export default function WorkCalendar() {
   }
 
   return (
-    <ScrollArea viewportRef={viewport} h="100vh" type="never" scrollbars="y">
+    <ScrollArea viewportRef={viewport} h="calc(100vh - 60px)" type="never" scrollbars="y">
       <Stack>
-        <CalendarHeader
+        {/* <CalendarHeader
           referenceDate={referenceDate}
           handleZoomChange={handleZoomChange}
-        />
+        /> */}
         <CalendarGrid
           visibleProjects={visibleProjects}
           handleNextAndPrev={handleNextAndPrev}

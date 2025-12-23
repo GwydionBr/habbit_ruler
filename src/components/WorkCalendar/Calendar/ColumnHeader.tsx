@@ -65,7 +65,7 @@ export default function ColumnHeader({
           ref={ref}
           style={{
             position: "sticky",
-            top: 60,
+            top: 0,
             zIndex: 20,
             cursor: day ? "pointer" : "default",
             border: isDayToday

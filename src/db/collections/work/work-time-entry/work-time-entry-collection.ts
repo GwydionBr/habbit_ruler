@@ -23,10 +23,3 @@ export const workTimeEntriesCollection = createCollection(
 
 export const useWorkTimeEntries = () =>
   useLiveQuery((q) => q.from({ workTimeEntries: workTimeEntriesCollection }));
-
-export const useWorkTimeEntriesByProjectId = (projectId: string) =>
-  useLiveQuery((q) =>
-    q
-      .from({ workTimeEntries: workTimeEntriesCollection })
-      .where(({ workTimeEntries }) => eq(workTimeEntries.project_id, projectId))
-  );

@@ -1,8 +1,9 @@
+import { useEffect, useMemo } from "react";
 import { useIntl } from "@/hooks/useIntl";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useWorkStore } from "@/stores/workManagerStore";
-import { useWorkProjectById } from "@/db/collections/work/work-project/work-project-collection";
-import { useWorkTimeEntriesByProjectId } from "@/db/collections/work/work-time-entry/work-time-entry-collection";
+import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
+import { useWorkTimeEntries } from "@/db/collections/work/work-time-entry/work-time-entry-collection";
 
 import {
   Group,
@@ -33,8 +34,16 @@ export default function WorkHeader() {
 
   if (!activeProjectId) return <Loader />;
 
-  const project = useWorkProjectById(activeProjectId);
-  const { data: timeEntries } = useWorkTimeEntriesByProjectId(activeProjectId);
+  const projects = useWorkProjects();
+  const project = projects?.find((project) => project.id === activeProjectId);
+
+  const { data: timeEntriesData } = useWorkTimeEntries();
+  const timeEntries = useMemo(() => {
+    return timeEntriesData?.filter(
+      (timeEntry) => timeEntry.project_id === activeProjectId
+    );
+  }, [timeEntriesData, activeProjectId]);
+
   if (!project) return <Loader />;
   const salary = formatMoney(project.salary, project.currency);
   const totalActiveSeconds = timeEntries.reduce(

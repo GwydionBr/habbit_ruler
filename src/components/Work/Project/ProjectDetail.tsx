@@ -1,10 +1,10 @@
-import { useWorkProjectById } from "@/db/collections/work/work-project/work-project-collection";
+import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
+import { useWorkTimeEntries } from "@/db/collections/work/work-time-entry/work-time-entry-collection";
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { useProjectFiltering } from "@/hooks/useProjectFiltering";
 import { useIntl } from "@/hooks/useIntl";
 import { useWorkStore } from "@/stores/workManagerStore";
-import { useWorkTimeEntries } from "@/db/collections/work/work-time-entry/work-time-entry-collection";
 import { getRouteApi } from "@tanstack/react-router";
 
 import {
@@ -53,7 +53,8 @@ export default function WorkProjectDetailsPage() {
     editProjectOpened,
   } = useWorkStore();
 
-  const project = useWorkProjectById(projectId);
+  const projects = useWorkProjects();
+
   const { data: timeEntriesData } = useWorkTimeEntries();
 
   const projectTimeEntries = useMemo(() => {
@@ -61,6 +62,7 @@ export default function WorkProjectDetailsPage() {
       (timeEntry) => timeEntry.project_id === projectId
     );
   }, [timeEntriesData, projectId]);
+  const project = projects?.find((project) => project.id === projectId);
 
   useEffect(() => {
     if (project?.id) {

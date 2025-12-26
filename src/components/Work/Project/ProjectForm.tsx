@@ -3,7 +3,11 @@ import { useForm } from "@mantine/form";
 import { useEffect, useState, useMemo } from "react";
 import { useDisclosure, useClickOutside } from "@mantine/hooks";
 import { useFinanceCategories } from "@/db/collections/finance/finance-category/finance-category-collection";
-import { workProjectsCollection } from "@/db/collections/work/work-project/work-project-collection";
+import {
+  workProjectsCollection,
+  syncProjectCategories,
+  getWorkProjectWithCategories,
+} from "@/db/collections/work/work-project/work-project-collection";
 import { useSettings } from "@/db/collections/settings/settings-collection";
 import { useProfileStore } from "@/stores/profileStore";
 import { useIntl } from "@/hooks/useIntl";
@@ -41,7 +45,6 @@ import {
   IconPalette,
   IconPlus,
 } from "@tabler/icons-react";
-import { Tables } from "@/types/db.types";
 import { Currency, RoundingDirection } from "@/types/settings.types";
 import CancelButton from "@/components/UI/Buttons/CancelButton";
 import {
@@ -50,10 +53,11 @@ import {
   InsertWorkProject,
 } from "@/types/work.types";
 import CustomNumberInput from "@/components/UI/CustomNumberInput";
+import { Tables, TablesInsert, TablesUpdate } from "@/types/db.types";
 
 interface ProjectFormProps {
   project?: WorkProject;
-  onSuccess?: (projectId: string) => void;
+  onSuccess?: (project: WorkProject) => void;
   onCancel?: () => void;
   categoryIds: string[];
   setCategoryIds: (categoryIds: string[]) => void;
@@ -199,76 +203,85 @@ export default function ProjectForm({
 
   const handleSubmit = async (values: z.infer<typeof schema>) => {
     const { cash_flow_category_ids, ...cleanValues } = values;
+
     if (project) {
-      const updatedProject: UpdateWorkProject = {
-        ...project,
+      // Update bestehendes Projekt
+      const updates: TablesUpdate<"timer_project"> = {
         ...cleanValues,
         currency: values.currency as Currency,
         rounding_direction: values.rounding_direction as RoundingDirection,
-        categories: financeCategories.filter((c) =>
-          cash_flow_category_ids.includes(c.id)
-        ),
       };
+
       if (isDefaultRounding) {
-        updatedProject.rounding_interval = null;
-        updatedProject.rounding_direction = null;
-        updatedProject.round_in_time_fragments = null;
-        updatedProject.time_fragment_interval = null;
+        updates.rounding_interval = null;
+        updates.rounding_direction = null;
+        updates.round_in_time_fragments = null;
+        updates.time_fragment_interval = null;
       }
-      const newTX = workProjectsCollection.update(project.id, (draft) => {
-        draft.title = updatedProject.title || "";
-        draft.description = updatedProject.description || "";
-        draft.salary = updatedProject.salary || 0;
-        draft.hourly_payment = updatedProject.hourly_payment || false;
-        draft.currency = updatedProject.currency || "USD";
-        draft.cash_flow_category_id =
-          updatedProject.cash_flow_category_id || null;
-        draft.rounding_interval = updatedProject.rounding_interval || null;
-        draft.rounding_direction = updatedProject.rounding_direction || null;
-        draft.round_in_time_fragments =
-          updatedProject.round_in_time_fragments || null;
+
+      // 1. Update des Projekts
+      const projectTx = workProjectsCollection.update(project.id, (draft) => {
+        Object.assign(draft, updates);
       });
-      await newTX.isPersisted.promise
-      onSuccess?.(project.id);
-    } else {
-      const newProject: InsertWorkProject = {
-        ...cleanValues,
-        currency: values.currency as Currency,
-        rounding_direction: values.rounding_direction as RoundingDirection,
-        categories: financeCategories.filter((c) =>
-          cash_flow_category_ids.includes(c.id)
-        ),
-      };
-      if (isDefaultRounding) {
-        newProject.rounding_interval = null;
-        newProject.rounding_direction = null;
-        newProject.round_in_time_fragments = null;
-        newProject.time_fragment_interval = null;
+      await projectTx.isPersisted.promise;
+
+      // 2. Synchronisiere Categories
+      await syncProjectCategories(project.id, cash_flow_category_ids, userId);
+
+      // 3. Lade das vollständige Projekt mit Categories
+      const updatedProject = await getWorkProjectWithCategories(project.id);
+
+      // Gebe das vollständige WorkProject an onSuccess
+      if (updatedProject) {
+        onSuccess?.(updatedProject);
       }
+    } else {
+      // Erstelle neues Projekt
       const newId = crypto.randomUUID();
-      const newTX = workProjectsCollection.insert({
+      const projectData: Tables<"timer_project"> = {
         id: newId,
+        title: cleanValues.title,
+        description: cleanValues.description || null,
+        salary: cleanValues.salary,
+        hourly_payment: cleanValues.hourly_payment,
+        currency: values.currency as Currency,
+        color: cleanValues.color || null,
+        cash_flow_category_id: null,
+        folder_id: null,
+        finance_project_id: null,
+        rounding_interval: isDefaultRounding
+          ? null
+          : cleanValues.rounding_interval,
+        rounding_direction: isDefaultRounding
+          ? null
+          : (values.rounding_direction as RoundingDirection),
+        round_in_time_fragments: isDefaultRounding
+          ? null
+          : cleanValues.round_in_time_fragments,
+        time_fragment_interval: isDefaultRounding
+          ? null
+          : cleanValues.time_fragment_interval,
         created_at: new Date().toISOString(),
         user_id: userId,
-        cash_flow_category_id: newProject.cash_flow_category_id || null,
-        color: newProject.color || null,
-        description: newProject.description || "",
-        salary: newProject.salary || 0,
-        hourly_payment: newProject.hourly_payment || false,
-        currency: newProject.currency || "USD",
-        title: newProject.title || "",
-        rounding_interval: newProject.rounding_interval || null,
-        rounding_direction: newProject.rounding_direction || null,
-        round_in_time_fragments: newProject.round_in_time_fragments || null,
-        time_fragment_interval: newProject.time_fragment_interval || null,
         total_payout: 0,
         order_index: 0,
         is_favorite: false,
-        folder_id: null,
-        finance_project_id: null,
-      });
-      await newTX.isPersisted.promise
-      onSuccess?.(newId);
+      };
+
+      // 1. Insert des Projekts
+      const projectTx = workProjectsCollection.insert(projectData);
+      await projectTx.isPersisted.promise;
+
+      // 2. Synchronisiere Categories
+      await syncProjectCategories(newId, cash_flow_category_ids, userId);
+
+      // 3. Lade das vollständige Projekt mit Categories
+      const newProject = await getWorkProjectWithCategories(newId);
+
+      // Gebe das vollständige WorkProject an onSuccess
+      if (newProject) {
+        onSuccess?.(newProject);
+      }
     }
   };
 

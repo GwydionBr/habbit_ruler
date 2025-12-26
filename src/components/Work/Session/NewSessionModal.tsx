@@ -3,11 +3,10 @@ import { useIntl } from "@/hooks/useIntl";
 import { workTimeEntriesCollection } from "@/db/collections/work/work-time-entry/work-time-entry-collection";
 import { useSettings } from "@/db/collections/settings/settings-collection";
 import { useProfileStore } from "@/stores/profileStore";
-import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
 
 import { Group, Modal, Text, useModalsStack } from "@mantine/core";
 import SessionForm from "./SessionForm";
-import { Tables, TablesInsert } from "@/types/db.types";
+import { TablesInsert } from "@/types/db.types";
 import { Currency } from "@/types/settings.types";
 import ProjectForm from "../Project/ProjectForm";
 import { IconClockPlus } from "@tabler/icons-react";
@@ -37,7 +36,6 @@ export default function NewSessionModal({
   ]);
   const { data: settings } = useSettings();
   const { id: userId } = useProfileStore();
-  const workProjects = useWorkProjects();
 
   const [currentProject, setCurrentProject] = useState<WorkProject | undefined>(
     project
@@ -181,8 +179,8 @@ export default function NewSessionModal({
           categoryIds={categoryIds}
           setCategoryIds={setCategoryIds}
           onOpenCategoryForm={() => stack.open("category-form")}
-          onSuccess={(projectId: string) => {
-            setCurrentProject(workProjects.find((p) => p.id === projectId));
+          onSuccess={(project: WorkProject) => {
+            setCurrentProject(project);
             stack.close("project-form");
           }}
         />

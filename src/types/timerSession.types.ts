@@ -1,7 +1,7 @@
 import type { Tables } from "@/types/db.types";
 import { Currency } from "@/types/settings.types";
 
-export interface SessionListProps {
+export interface WorkTimeEntryListProps {
   sessions: Tables<"timer_session">[];
   projects?: Tables<"timer_project">[];
   folders?: Tables<"timer_project_folder">[];
@@ -11,7 +11,7 @@ export interface SessionListProps {
   isOverview?: boolean;
 }
 
-export interface NewSession {
+export interface NewWorkTimeEntry {
   project_id?: string;
   start_time: string;
   end_time: string;

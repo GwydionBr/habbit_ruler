@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { useIntl } from "@/hooks/useIntl";
-import { workTimeEntriesCollection } from "@/db/collections/work/work-time-entry/work-time-entry-collection";
 import { useSettings } from "@/db/collections/settings/settings-collection";
-import { useProfileStore } from "@/stores/profileStore";
 
 import { Group, Modal, Text, useModalsStack } from "@mantine/core";
 import SessionForm from "./SessionForm";
@@ -10,15 +8,16 @@ import { TablesInsert } from "@/types/db.types";
 import { Currency } from "@/types/settings.types";
 import ProjectForm from "../Project/ProjectForm";
 import { IconClockPlus } from "@tabler/icons-react";
-import { NewSession } from "@/types/timerSession.types";
+import { NewWorkTimeEntry } from "@/types/timerSession.types";
 import { TimerRoundingSettings } from "@/types/timeTracker.types";
 import FinanceCategoryForm from "@/components/Finances/Category/FinanceCategoryForm";
 import { WorkProject } from "@/types/work.types";
+import { useWorkTimeEntryMutations } from "@/db/collections/work/work-time-entry/work-time-entry-hooks";
 
 interface NewSessionModalProps {
   opened: boolean;
   onClose: () => void;
-  initialValues?: NewSession;
+  initialValues?: NewWorkTimeEntry;
   project?: WorkProject;
 }
 
@@ -35,7 +34,7 @@ export default function NewSessionModal({
     "category-form",
   ]);
   const { data: settings } = useSettings();
-  const { id: userId } = useProfileStore();
+  const { addWorkTimeEntry } = useWorkTimeEntryMutations();
 
   const [currentProject, setCurrentProject] = useState<WorkProject | undefined>(
     project
@@ -98,37 +97,13 @@ export default function NewSessionModal({
         "up",
     };
 
+    // TODO Handle Rounding ETC.
     // createWorkTimeEntryMutation({
     //   newTimeEntry: newSession,
     //   roundingSettings,
     // });
-    // TODO Handle Rounding ETC.
-    workTimeEntriesCollection.insert({
-      id: crypto.randomUUID(),
-      created_at: new Date().toISOString(),
-      user_id: userId,
-      currency: newSession.currency as Currency,
-      hourly_payment:
-        currentProject?.hourly_payment ??
-        settings?.default_project_hourly_payment ??
-        false,
-      salary: newSession.salary,
-      memo: newSession.memo ?? null,
-      start_time: new Date(newSession.start_time).toISOString(),
-      end_time: new Date(newSession.end_time).toISOString(),
-      real_start_time: new Date(newSession.start_time).toISOString(),
-      true_end_time: new Date(newSession.end_time).toISOString(),
-      active_seconds: newSession.active_seconds,
-      paused_seconds: newSession.paused_seconds ?? 0,
-      paid: false,
-      payout_id: null,
-      single_cash_flow_id: null,
-      project_id: currentProject.id,
-      time_fragments_interval:
-        currentProject?.time_fragment_interval ??
-        settings?.time_section_interval ??
-        10,
-    });
+
+    await addWorkTimeEntry(newSession);
     onClose();
   }
 

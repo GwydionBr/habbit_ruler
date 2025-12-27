@@ -22,17 +22,17 @@ import UpdateButton from "@/components/UI/Buttons/UpdateButton";
 import CreateButton from "@/components/UI/Buttons/CreateButton";
 import LocaleDateTimePicker from "@/components/UI/Locale/LocaleDateTimePicker";
 
-import { NewSession } from "@/types/timerSession.types";
+import { NewWorkTimeEntry } from "@/types/timerSession.types";
 import CustomNumberInput from "@/components/UI/CustomNumberInput";
 import { WorkProject } from "@/types/work.types";
 
 interface SessionFormProps {
-  initialValues: NewSession;
+  initialValues: NewWorkTimeEntry;
   newSession: boolean;
   project?: WorkProject;
-  submitting?: boolean;
+
   onProjectChange?: (value: WorkProject) => void;
-  onSubmit: (values: NewSession) => void;
+  onSubmit: (values: NewWorkTimeEntry) => void;
   onCancel: () => void;
   onOpenProjectForm?: () => void;
 }
@@ -41,7 +41,6 @@ export default function SessionForm({
   initialValues,
   newSession,
   project,
-  submitting,
   onSubmit,
   onOpenProjectForm,
   onProjectChange,
@@ -77,7 +76,7 @@ export default function SessionForm({
     }),
   });
 
-  const form = useForm<NewSession>({
+  const form = useForm<NewWorkTimeEntry>({
     initialValues: {
       ...initialValues,
       project_id: initialValues.project_id || project?.id || undefined,
@@ -311,14 +310,12 @@ export default function SessionForm({
           <CreateButton
             onClick={form.onSubmit(onSubmit)}
             type="submit"
-            loading={submitting}
             mt="md"
           />
         ) : (
           <UpdateButton
             onClick={form.onSubmit(onSubmit)}
             type="submit"
-            loading={submitting}
             mt="md"
           />
         )}

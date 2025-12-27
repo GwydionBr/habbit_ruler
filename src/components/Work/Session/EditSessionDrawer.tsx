@@ -3,6 +3,7 @@ import { workTimeEntriesCollection } from "@/db/collections/work/work-time-entry
 import { useSettings } from "@/db/collections/settings/settings-collection";
 import { useIntl } from "@/hooks/useIntl";
 import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
+import { useWorkTimeEntryMutations } from "@/db/collections/work/work-time-entry/work-time-entry-hooks";
 
 import { Drawer, Flex, Group, Text, useDrawersStack, Box } from "@mantine/core";
 import { IconExclamationMark } from "@tabler/icons-react";
@@ -10,7 +11,7 @@ import SessionForm from "@/components/Work/Session/SessionForm";
 import DeleteActionIcon from "@/components/UI/ActionIcons/DeleteActionIcon";
 import CancelButton from "@/components/UI/Buttons/CancelButton";
 import DeleteButton from "@/components/UI/Buttons/DeleteButton";
-import ProjectForm from "../Project/ProjectForm";
+import ProjectForm from "@/components/Work/Project/ProjectForm";
 import FinanceCategoryForm from "@/components/Finances/Category/FinanceCategoryForm";
 
 import { Currency } from "@/types/settings.types";
@@ -36,6 +37,7 @@ export default function EditSessionDrawer({
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [currentProject, setCurrentProject] = useState<WorkProject>(project);
   const workProjects = useWorkProjects();
+  const { updateWorkTimeEntry } = useWorkTimeEntryMutations();
 
   const drawerStack = useDrawersStack([
     "edit-session",
@@ -99,14 +101,10 @@ export default function EditSessionDrawer({
     //   roundingSettings,
     // });
     // TODO Handle Rounding ETC.
-    workTimeEntriesCollection.update(timerSession.id, (draft) => {
-      draft.active_seconds = newSession.active_seconds;
-      draft.currency = newSession.currency;
-      draft.salary = newSession.salary;
-      draft.memo = newSession.memo;
-    });
+    updateWorkTimeEntry(timerSession.id, newSession);
     handleClose();
   }
+
   function handleDelete() {
     workTimeEntriesCollection.delete(timerSession.id);
   }
@@ -148,8 +146,8 @@ export default function EditSessionDrawer({
                 salary: timerSession.salary,
                 memo: timerSession.memo || undefined,
               }}
-              onSubmit={handleSubmit}
               onCancel={handleClose}
+              onSubmit={handleSubmit}
               onOpenProjectForm={() => drawerStack.open("add-project")}
               onProjectChange={setCurrentProject}
               newSession={false}

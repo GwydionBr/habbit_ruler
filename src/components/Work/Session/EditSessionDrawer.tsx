@@ -3,7 +3,7 @@ import { workTimeEntriesCollection } from "@/db/collections/work/work-time-entry
 import { useSettings } from "@/db/collections/settings/settings-collection";
 import { useIntl } from "@/hooks/useIntl";
 import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
-import { useWorkTimeEntryMutations } from "@/db/collections/work/work-time-entry/work-time-entry-hooks";
+import { useWorkTimeEntryMutations } from "@/db/collections/work/work-time-entry/use-work-time-entry-mutations";
 
 import { Drawer, Flex, Group, Text, useDrawersStack, Box } from "@mantine/core";
 import { IconExclamationMark } from "@tabler/icons-react";

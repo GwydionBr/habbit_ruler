@@ -9,7 +9,7 @@ import {
   addWorkTimeEntry,
   updateWorkTimeEntry,
   deleteWorkTimeEntry,
-} from "./work-time-entry-mutation";
+} from "./work-time-entry-mutations";
 import { InsertWorkTimeEntry, UpdateWorkTimeEntry } from "@/types/work.types";
 
 /**

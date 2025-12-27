@@ -1,9 +1,9 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useIntl } from "@/hooks/useIntl";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useWorkStore } from "@/stores/workManagerStore";
 import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
-import { useWorkTimeEntries } from "@/db/collections/work/work-time-entry/work-time-entry-collection";
+import { useWorkTimeEntries } from "@/db/collections/work/work-time-entry/use-work-time-entry-query";
 
 import {
   Group,

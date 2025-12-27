@@ -12,7 +12,7 @@ import { NewWorkTimeEntry } from "@/types/timerSession.types";
 import { TimerRoundingSettings } from "@/types/timeTracker.types";
 import FinanceCategoryForm from "@/components/Finances/Category/FinanceCategoryForm";
 import { WorkProject } from "@/types/work.types";
-import { useWorkTimeEntryMutations } from "@/db/collections/work/work-time-entry/work-time-entry-hooks";
+import { useWorkTimeEntryMutations } from "@/db/collections/work/work-time-entry/use-work-time-entry-mutations";
 
 interface NewSessionModalProps {
   opened: boolean;

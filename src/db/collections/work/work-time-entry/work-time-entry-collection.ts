@@ -1,6 +1,6 @@
-import { createCollection, eq, useLiveQuery } from "@tanstack/react-db";
+import { createCollection } from "@tanstack/react-db";
 import { powerSyncCollectionOptions } from "@tanstack/powersync-db-collection";
-// Importiere deine PowerSync-DB und das App-Schema
+// Import the PowerSync DB and the App Schema
 import { db } from "@/db/powersync/db";
 import { AppSchema } from "@/db/powersync/schema";
 import {
@@ -8,7 +8,7 @@ import {
   workTimeEntryDeserializationSchema,
 } from "@/db/collections/work/work-time-entry/work-time-entry-schema";
 
-// Collection basierend auf der PowerSync-Tabelle 'timer_project'
+// Collection based on the PowerSync table 'timer_session'
 export const workTimeEntriesCollection = createCollection(
   powerSyncCollectionOptions({
     database: db,
@@ -20,8 +20,4 @@ export const workTimeEntriesCollection = createCollection(
     },
   })
 );
-
-export const useWorkTimeEntries = () =>
-  useLiveQuery((q) => q.from({ workTimeEntries: workTimeEntriesCollection }));
-
   

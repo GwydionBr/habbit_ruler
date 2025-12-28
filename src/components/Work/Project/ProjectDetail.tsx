@@ -1,4 +1,4 @@
-import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
+import { useWorkProjects } from "@/db/collections/work/work-project/use-work-project-query";
 import { useWorkTimeEntries } from "@/db/collections/work/work-time-entry/use-work-time-entry-query";
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { useDisclosure } from "@mantine/hooks";

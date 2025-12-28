@@ -1,14 +1,6 @@
-import {
-  createCollection,
-  createLiveQueryCollection,
-  useLiveQuery,
-} from "@tanstack/react-db";
+import { createCollection } from "@tanstack/react-db";
 import { powerSyncCollectionOptions } from "@tanstack/powersync-db-collection";
-import { eq } from "@tanstack/db";
-import { useMemo } from "react";
-import { WorkProject } from "@/types/work.types";
-import { financeCategoriesCollection } from "@/db/collections/finance/finance-category/finance-category-collection";
-// Importiere deine PowerSync-DB und das App-Schema
+// Import the PowerSync DB and the App Schema
 import { db } from "@/db/powersync/db";
 import { AppSchema } from "@/db/powersync/schema";
 import {
@@ -18,7 +10,7 @@ import {
   workProjectCategoryDeserializationSchema,
 } from "@/db/collections/work/work-project/work-project-schema";
 
-// Collection basierend auf der PowerSync-Tabelle 'timer_project'
+// Collection based on the PowerSync table 'timer_project'
 export const workProjectsCollection = createCollection(
   powerSyncCollectionOptions({
     database: db,
@@ -42,68 +34,3 @@ export const workProjectCategoriesCollection = createCollection(
     },
   })
 );
-
-// Cached Live Query: Project → Categories Mapping
-const projectCategoryMappingCollection = createLiveQueryCollection((q) =>
-  q
-    .from({ relations: workProjectCategoriesCollection })
-    .innerJoin(
-      { category: financeCategoriesCollection },
-      ({ relations, category }) =>
-        eq(relations.finance_category_id, category.id)
-    )
-    .select(({ relations, category }) => ({
-      projectId: relations.timer_project_id,
-      category,
-    }))
-);
-
-export const useWorkProjects = () => {
-  const { data: projects } = useLiveQuery((q) =>
-    q.from({ workProjects: workProjectsCollection })
-  );
-  const { data: mappings } = useLiveQuery((q) =>
-    q.from({ mappings: projectCategoryMappingCollection })
-  );
-
-  return useMemo((): WorkProject[] => {
-    if (!projects) return [];
-
-    const categoriesByProject = new Map<string, WorkProject["categories"]>();
-    mappings?.forEach(({ projectId, category }) => {
-      if (!categoriesByProject.has(projectId)) {
-        categoriesByProject.set(projectId, []);
-      }
-      categoriesByProject.get(projectId)!.push(category);
-    });
-
-    return projects.map((project) => ({
-      ...project,
-      categories: categoriesByProject.get(project.id) || [],
-    }));
-  }, [projects, mappings]);
-};
-
-export const useWorkProjectById = (projectId: string) => {
-  const { data: project } = useLiveQuery((q) =>
-    q
-      .from({ workProjects: workProjectsCollection })
-      .where(({ workProjects }) => eq(workProjects.id, projectId))
-      .findOne()
-  );
-
-  const { data: mappings } = useLiveQuery((q) =>
-    q
-      .from({ mappings: projectCategoryMappingCollection })
-      .where(({ mappings }) => eq(mappings.projectId, projectId))
-  );
-
-  return useMemo((): WorkProject | undefined => {
-    if (!project) return undefined;
-
-    return {
-      ...project,
-      categories: mappings?.map(({ category }) => category) || [],
-    };
-  }, [project, mappings]);
-};

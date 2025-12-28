@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useTimeTrackerManager } from "@/stores/timeTrackerManagerStore";
 import { useIntl } from "@/hooks/useIntl";
-import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
+import { useWorkProjects } from "@/db/collections/work/work-project/use-work-project-query";
 
 import { alpha, Stack, Text } from "@mantine/core";
 import { endOfDay, isToday, isYesterday, startOfDay } from "date-fns";

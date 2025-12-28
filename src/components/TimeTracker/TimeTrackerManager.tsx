@@ -14,7 +14,7 @@ import TimeTrackerActionIcon from "./TimeTrackerActionIcons/TimeTrackerActionIco
 import { getStatusColor } from "@/lib/workHelperFunctions";
 import { Tables } from "@/types/db.types";
 import { useSettings } from "@/db/queries/settings/use-settings";
-import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
+import { useWorkProjects } from "@/db/collections/work/work-project/use-work-project-query";
 
 interface TimerManagerProps {
   isBig: boolean;

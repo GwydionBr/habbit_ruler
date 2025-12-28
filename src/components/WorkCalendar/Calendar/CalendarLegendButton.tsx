@@ -1,8 +1,6 @@
-"use client";
-
 import { useState } from "react";
 import { useDisclosure, useClickOutside } from "@mantine/hooks";
-import { workProjectsCollection } from "@/db/collections/work/work-project/work-project-collection";
+import { updateWorkProject } from "@/db/collections/work/work-project/work-project-mutations";
 
 import { Popover, Button, Box } from "@mantine/core";
 import ProjectColorPicker from "@/components/UI/ProjectColorPicker";
@@ -23,6 +21,10 @@ export default function CalendarLegendButton({ p }: CalendarLegendButtonProps) {
     close();
   });
 
+  const handleColorChange = () => {
+    updateWorkProject(p.id, { color: selectedColor });
+  };
+
   return (
     <Popover
       opened={isOpen}
@@ -31,9 +33,7 @@ export default function CalendarLegendButton({ p }: CalendarLegendButtonProps) {
       }}
       onClose={() => {
         close();
-        workProjectsCollection.update(p.id, (draft) => {
-          draft.color = selectedColor;
-        });
+        handleColorChange();
       }}
     >
       <Popover.Target>
@@ -64,9 +64,7 @@ export default function CalendarLegendButton({ p }: CalendarLegendButtonProps) {
           value={selectedColor}
           onChange={setSelectedColor}
           onClose={() => {
-            workProjectsCollection.update(p.id, (draft) => {
-              draft.color = selectedColor;
-            });
+            handleColorChange();
             close();
           }}
         />

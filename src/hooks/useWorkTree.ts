@@ -1,9 +1,7 @@
 import { useMemo } from "react";
 
-import {
-  useWorkProjects,
-  workProjectsCollection,
-} from "@/db/collections/work/work-project/work-project-collection";
+import { useWorkProjects } from "@/db/collections/work/work-project/use-work-project-query";
+import { workProjectsCollection } from "@/db/collections/work/work-project/work-project-collection";
 import {
   useWorkFolders,
   workFoldersCollection,

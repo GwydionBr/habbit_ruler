@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useWorkStore } from "@/stores/workManagerStore";
-import { workProjectsCollection, useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
+import { useWorkProjects } from "@/db/collections/work/work-project/use-work-project-query";
+import { useWorkProjectMutations } from "@/db/collections/work/work-project/use-work-project-mutations";
 import { useIntl } from "@/hooks/useIntl";
 
 import {
@@ -30,6 +31,7 @@ export default function EditProjectDrawer({
   const { getLocalizedText } = useIntl();
   const { lastActiveProjectId } = useWorkStore();
   const projects = useWorkProjects();
+  const { deleteWorkProject } = useWorkProjectMutations();
 
   const activeProject = useMemo(
     () => projects.find((p) => p.id === lastActiveProjectId),
@@ -66,7 +68,8 @@ export default function EditProjectDrawer({
 
   async function handleDelete() {
     if (activeProject) {
-      workProjectsCollection.delete(activeProject.id);
+      await deleteWorkProject(activeProject.id);
+      handleClose();
     }
   }
 

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDisclosure, useHotkeys, usePrevious } from "@mantine/hooks";
-import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
-import { useWorkTimeEntries } from "@/db/collections/work/work-time-entry/work-time-entry-collection";
+import { useWorkProjects } from "@/db/collections/work/work-project/use-work-project-query";
+import { useWorkTimeEntries } from "@/db/collections/work/work-time-entry/use-work-time-entry-query";
 import { useAppointments } from "@/db/collections/work/appointment/appointment-collection";
 import { useCalendarStore } from "@/stores/calendarStore";
 
@@ -52,7 +52,7 @@ export default function WorkCalendar() {
   const [drawerOpened, { open, close }] = useDisclosure(false);
   const viewport = useRef<HTMLDivElement>(null);
   const previousZoomIndex = usePrevious(zoomIndex);
-  
+
   useHotkeys([
     [
       "Escape",
@@ -273,7 +273,12 @@ export default function WorkCalendar() {
   }
 
   return (
-    <ScrollArea viewportRef={viewport} h="calc(100vh - 60px)" type="never" scrollbars="y">
+    <ScrollArea
+      viewportRef={viewport}
+      h="calc(100vh - 60px)"
+      type="never"
+      scrollbars="y"
+    >
       <Stack>
         {/* <CalendarHeader
           referenceDate={referenceDate}

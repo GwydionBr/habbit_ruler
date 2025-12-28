@@ -1,20 +1,18 @@
-import {
-  useWorkProjects,
-  workProjectsCollection,
-} from "@/db/collections/work/work-project/work-project-collection";
+import { workProjectsCollection } from "@/db/collections/work/work-project/work-project-collection";
+import { useWorkProjects } from "@/db/collections/work/work-project/use-work-project-query";
 
 export async function updateTestProject() {
   try {
     // Hole alle existierenden Projekte
     const projects = useWorkProjects();
 
-    if (!projects.data || projects.data?.length === 0) {
+    if (!projects || projects.length === 0) {
       throw new Error("Keine Projekte zum Aktualisieren gefunden");
     }
 
     // Wähle ein zufälliges Projekt aus
     const randomProject =
-      projects.data?.[Math.floor(Math.random() * projects.data.length || 0)];
+      projects[Math.floor(Math.random() * projects.length || 0)];
 
     // Generiere eine zufällige Farbe
     const randomColor = `#${Math.floor(Math.random() * 16777215)

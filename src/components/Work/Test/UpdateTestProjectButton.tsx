@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { Button } from "@mantine/core";
 import { IconRefresh } from "@tabler/icons-react";
-import {
-  useWorkProjects,
-  workProjectsCollection,
-} from "@/db/collections/work/work-project/work-project-collection";
+import { useWorkProjects } from "@/db/collections/work/work-project/use-work-project-query";
+import { workProjectsCollection } from "@/db/collections/work/work-project/work-project-collection";
 import {
   showActionSuccessNotification,
   showActionErrorNotification,
@@ -14,7 +12,7 @@ import { useIntl } from "@/hooks/useIntl";
 export function UpdateTestProjectButton() {
   const [isLoading, setIsLoading] = useState(false);
   const { getLocalizedText } = useIntl();
-  const { data: workProjects } = useWorkProjects();
+  const workProjects = useWorkProjects();
 
   const handleUpdateTestProject = async () => {
     setIsLoading(true);

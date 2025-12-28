@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useForm } from "@mantine/form";
-import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
+import { useWorkProjects } from "@/db/collections/work/work-project/use-work-project-query";
 import { useIntl } from "@/hooks/useIntl";
 
 import {

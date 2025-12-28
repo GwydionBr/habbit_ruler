@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useWorkStore } from "@/stores/workManagerStore";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useWorkProjects } from "@/db/collections/work/work-project/work-project-collection";
+import { useWorkProjects } from "@/db/collections/work/work-project/use-work-project-query";
 import { useSettingsStore } from "@/stores/settingsStore";
 
 import { Box, Group } from "@mantine/core";
@@ -26,8 +26,7 @@ function RouteComponent() {
   // Führe eine Live-Query aus: alle Projekte abrufen
   const workProjects = useWorkProjects();
 
-  const { activeProjectId, lastActiveProjectId } =
-    useWorkStore();
+  const { activeProjectId, lastActiveProjectId } = useWorkStore();
 
   const router = useRouter();
 
@@ -54,10 +53,7 @@ function RouteComponent() {
   return (
     <Group h="100%" wrap="nowrap" mx="xs" align="flex-start">
       <ProjectNavbar />
-      <Box
-        style={{ transition: "margin 0.4s ease-in-out" }}
-        w="100%"
-      >
+      <Box style={{ transition: "margin 0.4s ease-in-out" }} w="100%">
         <ProjectDetail />
       </Box>
     </Group>

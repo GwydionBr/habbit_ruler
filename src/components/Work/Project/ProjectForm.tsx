@@ -3,11 +3,7 @@ import { useForm } from "@mantine/form";
 import { useEffect, useState, useMemo } from "react";
 import { useDisclosure, useClickOutside } from "@mantine/hooks";
 import { useFinanceCategories } from "@/db/collections/finance/finance-category/finance-category-collection";
-import { workProjectsCollection } from "@/db/collections/work/work-project/work-project-collection";
-import {
-  syncProjectCategories,
-  getWorkProjectWithCategories,
-} from "@/db/collections/work/work-project/work-project-mutations";
+import { useWorkProjectMutations } from "@/db/collections/work/work-project/use-work-project-mutations";
 import { useSettings } from "@/db/collections/settings/settings-collection";
 import { useProfileStore } from "@/stores/profileStore";
 import { useIntl } from "@/hooks/useIntl";
@@ -89,6 +85,7 @@ export default function ProjectForm({
   const { getLocalizedText, locale } = useIntl();
   const { data: financeCategories } = useFinanceCategories();
   const { id: userId } = useProfileStore();
+  const { addWorkProject, updateWorkProject } = useWorkProjectMutations();
   const [isColorPickerOpen, { open, close }] = useDisclosure(false);
   const [
     isDefaultRounding,
@@ -201,7 +198,7 @@ export default function ProjectForm({
     const { cash_flow_category_ids, ...cleanValues } = values;
 
     if (project) {
-      // Update bestehendes Projekt
+      // Update existing project
       const updates: TablesUpdate<"timer_project"> = {
         ...cleanValues,
         currency: values.currency as Currency,
@@ -215,24 +212,19 @@ export default function ProjectForm({
         updates.time_fragment_interval = null;
       }
 
-      // 1. Update des Projekts
-      const projectTx = workProjectsCollection.update(project.id, (draft) => {
-        Object.assign(draft, updates);
-      });
-      await projectTx.isPersisted.promise;
+      // Use the mutation hook
+      const updatedProject = await updateWorkProject(
+        project.id,
+        updates,
+        cash_flow_category_ids
+      );
 
-      // 2. Synchronisiere Categories
-      await syncProjectCategories(project.id, cash_flow_category_ids, userId);
-
-      // 3. Lade das vollständige Projekt mit Categories
-      const updatedProject = await getWorkProjectWithCategories(project.id);
-
-      // Gebe das vollständige WorkProject an onSuccess
+      // Return the complete WorkProject to onSuccess
       if (updatedProject) {
         onSuccess?.(updatedProject);
       }
     } else {
-      // Erstelle neues Projekt
+      // Create new project
       const newId = crypto.randomUUID();
       const projectData: Tables<"timer_project"> = {
         id: newId,
@@ -264,17 +256,13 @@ export default function ProjectForm({
         is_favorite: false,
       };
 
-      // 1. Insert des Projekts
-      const projectTx = workProjectsCollection.insert(projectData);
-      await projectTx.isPersisted.promise;
+      // Use the mutation hook
+      const newProject = await addWorkProject(
+        projectData,
+        cash_flow_category_ids
+      );
 
-      // 2. Synchronisiere Categories
-      await syncProjectCategories(newId, cash_flow_category_ids, userId);
-
-      // 3. Lade das vollständige Projekt mit Categories
-      const newProject = await getWorkProjectWithCategories(newId);
-
-      // Gebe das vollständige WorkProject an onSuccess
+      // Return the complete WorkProject to onSuccess
       if (newProject) {
         onSuccess?.(newProject);
       }

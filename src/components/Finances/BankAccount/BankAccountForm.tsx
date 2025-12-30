@@ -1,7 +1,7 @@
 import { useForm } from "@mantine/form";
 import { useIntl } from "@/hooks/useIntl";
 import { bankAccountsCollection } from "@/db/collections/finance/bank-account/bank-account-collection";
-import { useProfileStore } from "@/stores/profileStore";
+import { useProfile } from "@/db/collections/profile/profile-collection"; 
 
 import { Stack, Select, TextInput } from "@mantine/core";
 
@@ -38,7 +38,7 @@ export default function BankAccountForm({
 }: BankAccountFormProps) {
   const { getLocalizedText } = useIntl();
   const { data: settings } = useSettings();
-  const { id: userId } = useProfileStore();
+  const { data: profile } = useProfile();
 
   const form = useForm({
     initialValues: {
@@ -70,7 +70,7 @@ export default function BankAccountForm({
         id: crypto.randomUUID(),
         created_at: new Date().toISOString(),
         saldo_set_at: new Date().toISOString(),
-        user_id: userId,
+        user_id: profile?.id || "",
         title: values.title,
         description: values.description || null,
         currency: values.currency as Database["public"]["Enums"]["currency"],

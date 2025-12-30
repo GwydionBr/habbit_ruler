@@ -6,6 +6,8 @@ import {
   profileSchema,
   profileDeserializationSchema,
 } from "@/db/collections/profile/profile-schema";
+import { useMemo } from "react";
+import { useRouteContext } from "@tanstack/react-router";
 
 // Collection basierend auf der PowerSync-Tabelle 'profiles'
 export const profileCollection = createCollection(
@@ -20,6 +22,36 @@ export const profileCollection = createCollection(
   })
 );
 
+// Returns the profile of the current user
 export const useProfile = () => {
-  return useLiveQuery((q) => q.from({ profile: profileCollection }).findOne());
-}
+  const { user } = useRouteContext({ from: "__root__" });
+  const currentUserId = user?.id;
+
+  const { data: profiles } = useLiveQuery((q) =>
+    q.from({ profiles: profileCollection })
+  );
+
+  return useMemo(
+    () => ({
+      data: profiles?.find((profile) => profile.id === currentUserId) ?? null,
+    }),
+    [profiles, currentUserId]
+  );
+};
+
+// Returns profiles of all other users (excluding the current user)
+export const useOtherProfiles = () => {
+  const { user } = useRouteContext({ from: "__root__" });
+  const currentUserId = user?.id;
+
+  const { data: profiles } = useLiveQuery((q) =>
+    q.from({ profiles: profileCollection })
+  );
+
+  return useMemo(
+    () => ({
+      data: profiles?.filter((profile) => profile.id !== currentUserId) ?? [],
+    }),
+    [profiles, currentUserId]
+  );
+};

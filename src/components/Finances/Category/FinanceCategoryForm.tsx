@@ -1,6 +1,6 @@
 import { useForm } from "@mantine/form";
 import { useIntl } from "@/hooks/useIntl";
-import { useProfileStore } from "@/stores/profileStore";
+import { useProfile } from "@/db/collections/profile/profile-collection";
 
 import { TextInput, Stack, Textarea } from "@mantine/core";
 import { z } from "zod";
@@ -28,7 +28,7 @@ export default function FinanceCategoryForm({
   category,
 }: FinanceCategoryFormProps) {
   const { getLocalizedText } = useIntl();
-  const { id: userId } = useProfileStore();
+  const { data: profile } = useProfile();
 
   const form = useForm({
     initialValues: {
@@ -59,7 +59,7 @@ export default function FinanceCategoryForm({
       const newCategory: Tables<"finance_category"> = {
         id: newId,
         created_at: new Date().toISOString(),
-        user_id: userId,
+        user_id: profile?.id || "",
         title: values.title,
         description: values.description || null,
       };

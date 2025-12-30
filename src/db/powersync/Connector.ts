@@ -7,8 +7,8 @@ import {
   type PowerSyncCredentials,
 } from "@powersync/web";
 
-import { Session, SupabaseClient, createClient } from "@supabase/supabase-js";
-import { fetchSupabaseSession } from "@/lib/supabaseSessionFetcher";
+import { Session, SupabaseClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 
 export type SupabaseConfig = {
   supabaseUrl: string;
@@ -52,14 +52,9 @@ export class SupabaseConnector
       supabaseAnonKey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
     };
 
-    this.client = createClient(
+    this.client = createBrowserClient(
       this.config.supabaseUrl,
-      this.config.supabaseAnonKey,
-      {
-        auth: {
-          persistSession: true,
-        },
-      }
+      this.config.supabaseAnonKey
     );
     this.currentSession = null;
     this.ready = false;
@@ -102,6 +97,18 @@ export class SupabaseConnector
     this.iterateListeners((cb) => cb.initialized?.());
   }
 
+  async getCurrentSession() {
+    const {
+      data: { session },
+      error,
+    } = await this.client.auth.getSession();
+    if (error) {
+      throw error;
+    }
+    this.updateSession(session);
+    return session;
+  }
+
   async login(username: string, password: string) {
     const {
       data: { session },
@@ -124,7 +131,6 @@ export class SupabaseConnector
       throw error;
     }
     this.currentSession = null;
-    
   }
 
   async register(email: string, password: string) {

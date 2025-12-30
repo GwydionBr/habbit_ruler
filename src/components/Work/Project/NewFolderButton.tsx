@@ -1,7 +1,5 @@
-"use client";
-
 import { useDisclosure } from "@mantine/hooks";
-import { useProfileStore } from "@/stores/profileStore";
+import { useProfile } from "@/db/collections/profile/profile-collection";
 
 import {
   Modal,
@@ -27,7 +25,7 @@ const folderSchema = z.object({
 
 export default function NewFolderButton({ ...props }: ActionIconProps) {
   const [opened, { open, close }] = useDisclosure(false);
-  const { id: userId } = useProfileStore();
+  const { data: profile } = useProfile();
 
   const form = useForm({
     initialValues: {
@@ -41,7 +39,7 @@ export default function NewFolderButton({ ...props }: ActionIconProps) {
     workFoldersCollection.insert({
       id: crypto.randomUUID(),
       created_at: new Date().toISOString(),
-      user_id: userId,
+      user_id: profile?.id || "",
       title: values.title,
       description: values.description,
       order_index: 0,

@@ -1,11 +1,11 @@
 import { useForm } from "@mantine/form";
 import { useIntl } from "@/hooks/useIntl";
-import { useProfileStore } from "@/stores/profileStore";
+import { useProfile } from "@/db/collections/profile/profile-collection";
 
 import { Fieldset, Select, Stack, TextInput } from "@mantine/core";
 
 import { z } from "zod";
-import { zod4Resolver } from "mantine-form-zod-resolver";
+import { zodResolver } from "mantine-form-zod-resolver";
 import { currencies } from "@/constants/settings";
 import CreateButton from "@/components/UI/Buttons/CreateButton";
 import UpdateButton from "@/components/UI/Buttons/UpdateButton";
@@ -38,7 +38,7 @@ export default function FinanceClientForm({
   client,
 }: FinanceClientFormProps) {
   const { getLocalizedText } = useIntl();
-  const { id: userId } = useProfileStore();
+  const { data: profile } = useProfile();
 
   const form = useForm({
     initialValues: {
@@ -49,7 +49,7 @@ export default function FinanceClientForm({
       address: client?.address || "",
       currency: client?.currency || "USD",
     },
-    validate: zod4Resolver(schema),
+    validate: zodResolver(schema),
   });
 
   const handleClose = () => {
@@ -72,7 +72,7 @@ export default function FinanceClientForm({
       const result = contactsCollection.insert({
         id: crypto.randomUUID(),
         created_at: new Date().toISOString(),
-        user_id: userId,
+        user_id: profile?.id || "",
         name: values.name,
         description: values.description || null,
         email: values.email || null,

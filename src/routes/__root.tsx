@@ -28,17 +28,18 @@ import { createIsomorphicFn } from "@tanstack/react-start";
 /**
  * Client-seitiger Fallback für Auth-Prüfung (funktioniert offline)
  */
-const getClientAuth = createIsomorphicFn()
+const getAuth = createIsomorphicFn()
   .server(async () => {
     return undefined;
   })
   .client(async () => {
     try {
       const { connector } = await import("@/db/powersync/db");
-      const {
-        data: { session },
-      } = await connector.client.auth.getSession();
-      return session?.user;
+      const session = await connector.getCurrentSession();
+      if (!session?.user) {
+        return undefined;
+      }
+      return session.user;
     } catch (error) {
       console.error("Error getting client auth:", error);
       return undefined;
@@ -49,8 +50,7 @@ export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
   beforeLoad: async () => {
-    const user = await getClientAuth();
-    console.log("user", user);
+    const user = await getAuth();
     return { user };
   },
   head: () => ({

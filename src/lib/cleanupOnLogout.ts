@@ -1,6 +1,6 @@
 import { db } from "@/db/powersync/db";
 import { useCalendarStore } from "@/stores/calendarStore";
-import { useProfileStore } from "@/stores/profileStore";
+import { useProfile } from "@/db/collections/profile/profile-collection";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useTimeTrackerManager } from "@/stores/timeTrackerManagerStore";
 import { useWorkStore } from "@/stores/workManagerStore";
@@ -19,7 +19,6 @@ export async function cleanupOnLogout() {
     useTimeTrackerManager.getState().resetStore();
     useWorkStore.getState().resetStore();
     useGroupStore.getState().resetStore();
-    useProfileStore.getState().resetStore();
     useSettingsStore.getState().resetStore();
   } catch (error) {
     console.error("Error resetting stores:", error);
@@ -38,7 +37,6 @@ export async function cleanupOnLogout() {
   try {
     const storeKeys = [
       "calendar-store",
-      "profile",
       "settings",
       "time-tracker-manager-storage",
       "work-store",
@@ -60,7 +58,7 @@ export async function cleanupOnLogout() {
   try {
     if (typeof indexedDB !== "undefined" && indexedDB.databases) {
       const databases = await indexedDB.databases();
-      for (const database of databases) {
+      for (const database of databases) { 
         if (database.name) {
           try {
             indexedDB.deleteDatabase(database.name);

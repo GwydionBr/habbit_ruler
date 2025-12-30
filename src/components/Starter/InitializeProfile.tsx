@@ -1,10 +1,11 @@
-"use client";
-
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useIntl } from "@/hooks/useIntl";
 import { useRouter } from "@tanstack/react-router";
-import { useOtherProfiles, useProfile } from "@/db/queries/profile/use-profile";
-import { useUpdateProfile } from "@/db/queries/profile/use-update-profile";
+import {
+  profileCollection,
+  useOtherProfiles,
+  useProfile,
+} from "@/db/collections/profile/profile-collection";
 
 import {
   Text,
@@ -40,14 +41,14 @@ import { getGradientForColor, mantineColors } from "@/constants/colors";
 
 export default function InitializeProfile() {
   const router = useRouter();
-  const { data: profile, isPending: isProfilePending } = useProfile();
-  const { mutate: updateProfile, isPending: isUpdating } = useUpdateProfile({
-    onSuccess: () => {
-      router.invalidate();
-      router.navigate({ to: "/dashboard" });
-    },
-  });
   const { data: otherProfiles } = useOtherProfiles();
+  const { data: profile } = useProfile();
+  // const { mutate: updateProfile, isPending: isUpdating } = useUpdateProfile({
+  //   onSuccess: () => {
+  //     router.invalidate();
+  //     router.navigate({ to: "/dashboard" });
+  //   },
+  // });
 
   const { locale, format_24h, setSettingState, primaryColor, setPrimaryColor } =
     useSettingsStore();
@@ -96,11 +97,10 @@ export default function InitializeProfile() {
 
   async function handleSubmit(values: typeof form.values) {
     if (!profile) return;
-    updateProfile({
-      id: profile.id,
-      full_name: `${values.name} ${values.surname}`,
-      username: values.username,
-      initialized: true,
+    profileCollection.update(profile.id, (draft) => {
+      draft.username = values.username;
+      draft.full_name = `${values.name} ${values.surname}`;
+      draft.initialized = true;
     });
   }
 
@@ -372,12 +372,10 @@ export default function InitializeProfile() {
                     type="submit"
                     disabled={
                       !isUsernameValid ||
-                      isUpdating ||
                       isOldUsername ||
                       !profile ||
-                      isProfilePending
+                      !isUsernameValid
                     }
-                    loading={isUpdating}
                     variant="gradient"
                     gradient={{
                       from: `${primaryColor}.5`,

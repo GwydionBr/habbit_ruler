@@ -5,7 +5,7 @@ import { useDisclosure, useClickOutside } from "@mantine/hooks";
 import { useFinanceCategories } from "@/db/collections/finance/finance-category/finance-category-collection";
 import { useWorkProjectMutations } from "@/db/collections/work/work-project/use-work-project-mutations";
 import { useSettings } from "@/db/collections/settings/settings-collection";
-import { useProfileStore } from "@/stores/profileStore";
+import { useProfile } from "@/db/collections/profile/profile-collection";
 import { useIntl } from "@/hooks/useIntl";
 
 import {
@@ -84,7 +84,7 @@ export default function ProjectForm({
   const { data: settings } = useSettings();
   const { getLocalizedText, locale } = useIntl();
   const { data: financeCategories } = useFinanceCategories();
-  const { id: userId } = useProfileStore();
+  const { data: profile } = useProfile();
   const { addWorkProject, updateWorkProject } = useWorkProjectMutations();
   const [isColorPickerOpen, { open, close }] = useDisclosure(false);
   const [
@@ -250,7 +250,7 @@ export default function ProjectForm({
           ? null
           : cleanValues.time_fragment_interval,
         created_at: new Date().toISOString(),
-        user_id: userId,
+        user_id: profile?.id || "",
         total_payout: 0,
         order_index: 0,
         is_favorite: false,

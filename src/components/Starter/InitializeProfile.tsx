@@ -102,6 +102,8 @@ export default function InitializeProfile() {
       draft.full_name = `${values.name} ${values.surname}`;
       draft.initialized = true;
     });
+    router.invalidate();
+    router.navigate({ to: "/dashboard" });
   }
 
   if (!profile) {
@@ -119,8 +121,6 @@ export default function InitializeProfile() {
   if (form.values.surname) completedFields++;
   if (isUsernameValid && !isOldUsername) completedFields++;
   const progressPercentage = (completedFields / totalFields) * 100;
-
-  const gradient = getGradientForColor(primaryColor);
 
   return (
     <Box

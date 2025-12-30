@@ -27,16 +27,18 @@ export const useProfile = () => {
   const { user } = useRouteContext({ from: "__root__" });
   const currentUserId = user?.id;
 
-  const { data: profiles } = useLiveQuery((q) =>
-    q.from({ profiles: profileCollection })
-  );
+  const {
+    data: profiles,
+    isReady,
+    isLoading,
+  } = useLiveQuery((q) => q.from({ profiles: profileCollection }));
 
-  return useMemo(
-    () => ({
-      data: profiles?.find((profile) => profile.id === currentUserId) ?? null,
-    }),
+  const profile = useMemo(
+    () => profiles?.find((profile) => profile.id === currentUserId) ?? null,
     [profiles, currentUserId]
   );
+
+  return { data: profile, isReady, isLoading };
 };
 
 // Returns profiles of all other users (excluding the current user)

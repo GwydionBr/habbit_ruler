@@ -34,7 +34,7 @@ export default function TimeTrackerInstance({
   const [memo, setMemo] = useState<string>(timer.memo ?? "");
   const { updateTimer, removeTimer, setForceEndTimer, getAllTimers } =
     useTimeTrackerManager();
-  const projects = useWorkProjects();
+  const { data: projects, isLoading: isProjectsLoading } = useWorkProjects();
   const project = useMemo(
     () => projects.find((p) => p.id === timer.projectId),
     [projects, timer.projectId]

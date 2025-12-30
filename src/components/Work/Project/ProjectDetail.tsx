@@ -46,29 +46,25 @@ const route = getRouteApi("/_app/work");
 export default function WorkProjectDetailsPage() {
   const { projectId } = route.useSearch();
   const {
-    setActiveProjectId,
     setAnalysisOpened,
     setEditProjectOpened,
     analysisOpened,
     editProjectOpened,
   } = useWorkStore();
 
-  const projects = useWorkProjects();
+  const { data: projects, isLoading: isProjectsLoading } = useWorkProjects();
 
-  const { data: timeEntriesData } = useWorkTimeEntries();
+  const { data: timeEntriesData, isLoading: isTimeEntriesLoading } =
+    useWorkTimeEntries();
 
   const projectTimeEntries = useMemo(() => {
     return timeEntriesData?.filter(
       (timeEntry) => timeEntry.project_id === projectId
     );
   }, [timeEntriesData, projectId]);
-  const project = projects?.find((project) => project.id === projectId);
-
-  useEffect(() => {
-    if (project?.id) {
-      setActiveProjectId(project.id);
-    }
-  }, [project?.id]);
+  const project = useMemo(() => {
+    return projects?.find((project) => project.id === projectId);
+  }, [projects, projectId]);
 
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
     null

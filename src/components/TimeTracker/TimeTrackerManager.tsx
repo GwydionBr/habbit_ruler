@@ -38,7 +38,7 @@ export default function TimerManager({
   const { activeProjectId } = useWorkStore();
   const { data: settings } = useSettings();
   const { getLocalizedText } = useIntl();
-  const projects = useWorkProjects();
+  const { data: projects, isLoading: isProjectsLoading } = useWorkProjects();
 
   const activeProject = useMemo(
     () => projects.find((p) => p.id === activeProjectId),

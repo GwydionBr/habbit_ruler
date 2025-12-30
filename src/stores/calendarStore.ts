@@ -2,14 +2,14 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 import { TimerData } from "@/types/timeTracker.types";
-import { Tables } from "@/types/db.types";
 import { ViewMode } from "@/types/workCalendar.types";
 import { startOfWeek, endOfWeek } from "date-fns";
+import { WorkProject, WorkTimeEntry } from "@/types/work.types";
 
 interface CalendarStoreState {
   activeTimer: TimerData | null;
-  selectedProject: Tables<"timer_project"> | null;
-  selectedSession: Tables<"timer_session"> | null;
+  selectedProject: WorkProject | null;
+  selectedSession: WorkTimeEntry | null;
   dateRange: [Date | null, Date | null];
   currentDateRange: [Date, Date];
   referenceDate: Date;
@@ -28,8 +28,8 @@ interface CalendarStoreActions {
   resetStore: () => void;
   setViewMode: (viewMode: ViewMode) => void;
   changeZoomIndex: (delta: number) => void;
-  setSelectedProject: (selectedProject: Tables<"timer_project"> | null) => void;
-  setSelectedSession: (selectedSession: Tables<"timer_session"> | null) => void;
+  setSelectedProject: (selectedProject: WorkProject | null) => void;
+  setSelectedSession: (selectedSession: WorkTimeEntry | null) => void;
   setDateRange: (dateRange: [Date | null, Date | null]) => void;
   setCurrentDateRange: (currentDateRange: [Date, Date]) => void;
   setReferenceDate: (referenceDate: Date) => void;
@@ -100,9 +100,9 @@ export const useCalendarStore = create<
         set({ eventIsSelected: isSelected }),
       setAddingMode: (isAddingMode: boolean) =>
         set({ addingMode: isAddingMode }),
-      setSelectedProject: (selectedProject: Tables<"timer_project"> | null) =>
+      setSelectedProject: (selectedProject: WorkProject | null) =>
         set({ selectedProject }),
-      setSelectedSession: (selectedSession: Tables<"timer_session"> | null) =>
+      setSelectedSession: (selectedSession: WorkTimeEntry | null) =>
         set({ selectedSession }),
       setDateRange: (dateRange: [Date | null, Date | null]) =>
         set({ dateRange }),

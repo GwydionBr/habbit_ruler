@@ -3,7 +3,7 @@ import { useWorkStore } from "@/stores/workManagerStore";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useWorkProjects } from "@/db/collections/work/work-project/use-work-project-query";
 
-import { Box, Group } from "@mantine/core";
+import { Box, Center, Group, Loader } from "@mantine/core";
 import WorkInitializer from "@/components/Work/WorkInitializer";
 import ProjectNavbar from "@/components/Navbar/ProjectNavbar";
 import ProjectDetail from "@/components/Work/Project/ProjectDetail";
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_app/work")({
 function RouteComponent() {
   const { projectId } = Route.useSearch();
   // Führe eine Live-Query aus: alle Projekte abrufen
-  const workProjects = useWorkProjects();
+  const { data: workProjects, isLoading } = useWorkProjects();
 
   const { activeProjectId, lastActiveProjectId } = useWorkStore();
 
@@ -41,11 +41,24 @@ function RouteComponent() {
           to: "/work",
           search: { projectId: lastActiveProjectId },
         });
+      } else if (workProjects.length > 0) {
+        router.navigate({
+          to: "/work",
+          search: { projectId: workProjects[0].id },
+        });
       }
     }
-  }, [projectId, activeProjectId, lastActiveProjectId, router]);
+  }, [projectId, activeProjectId, lastActiveProjectId, router, workProjects]);
 
-  if (workProjects && workProjects.length === 0) {
+  if (isLoading) {
+    return (
+      <Center w="100%" h="100%">
+        <Loader size="lg" />
+      </Center>
+    );
+  }
+
+  if (workProjects && workProjects.length === 0 && !isLoading) {
     return <WorkInitializer />;
   }
 

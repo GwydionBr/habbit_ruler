@@ -14,11 +14,11 @@ import {
 } from "@/types/work.types";
 
 export const useWorkTree = () => {
-  const projects = useWorkProjects();
+  const { data: projects, isLoading: isProjectsLoading } = useWorkProjects();
   const { data: folders } = useWorkFolders();
 
   const cleanedProjects = useMemo(() => {
-    return projects?.map((project) => {
+    return projects.map((project) => {
       const { categories, ...rest } = project;
       return rest;
     });

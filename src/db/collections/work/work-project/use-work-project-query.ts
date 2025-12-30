@@ -1,8 +1,18 @@
-import { WorkProject } from "@/types/work.types";
-import { createLiveQueryCollection, eq, useLiveQuery } from "@tanstack/react-db";
-import { workProjectsCollection, workProjectCategoriesCollection } from "./work-project-collection";
+import { useEffect, useState } from "react";
 import { useMemo } from "react";
+import {
+  createLiveQueryCollection,
+  eq,
+  useLiveQuery,
+} from "@tanstack/react-db";
+
+import {
+  workProjectsCollection,
+  workProjectCategoriesCollection,
+} from "./work-project-collection";
 import { financeCategoriesCollection } from "@/db/collections/finance/finance-category/finance-category-collection";
+
+import { WorkProject } from "@/types/work.types";
 
 // Cached Live Query: Project → Categories Mapping
 const projectCategoryMappingCollection = createLiveQueryCollection((q) =>
@@ -19,16 +29,20 @@ const projectCategoryMappingCollection = createLiveQueryCollection((q) =>
     }))
 );
 
-
 export const useWorkProjects = () => {
-  const { data: projects } = useLiveQuery((q) =>
+  const [isLoading, setIsLoading] = useState(false);
+  const { data: projects, isLoading: isProjectsLoading } = useLiveQuery((q) =>
     q.from({ workProjects: workProjectsCollection })
   );
-  const { data: mappings } = useLiveQuery((q) =>
+  const { data: mappings, isLoading: isMappingsLoading } = useLiveQuery((q) =>
     q.from({ mappings: projectCategoryMappingCollection })
   );
 
-  return useMemo((): WorkProject[] => {
+  useEffect(() => {
+    setIsLoading(isProjectsLoading || isMappingsLoading);
+  }, [isProjectsLoading, isMappingsLoading]);
+
+  const projectsWithCategories = useMemo((): WorkProject[] => {
     if (!projects) return [];
 
     const categoriesByProject = new Map<string, WorkProject["categories"]>();
@@ -44,4 +58,6 @@ export const useWorkProjects = () => {
       categories: categoriesByProject.get(project.id) || [],
     }));
   }, [projects, mappings]);
+
+  return { isLoading, data: projectsWithCategories };
 };

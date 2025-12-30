@@ -30,7 +30,7 @@ export default function EditProjectDrawer({
 }: EditProjectDrawerProps) {
   const { getLocalizedText } = useIntl();
   const { lastActiveProjectId } = useWorkStore();
-  const projects = useWorkProjects();
+  const { data: projects, isLoading: isProjectsLoading } = useWorkProjects();
   const { deleteWorkProject } = useWorkProjectMutations();
 
   const activeProject = useMemo(

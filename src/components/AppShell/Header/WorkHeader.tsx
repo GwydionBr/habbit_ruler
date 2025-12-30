@@ -32,17 +32,31 @@ export default function WorkHeader() {
   const { getLocalizedText, formatMoney } = useIntl();
   const theme = useMantineTheme();
 
-  const projects = useWorkProjects();
-  const project = projects?.find((project) => project.id === activeProjectId);
+  const { data: projects, isLoading: isProjectsLoading } = useWorkProjects();
+  const project = useMemo(() => {
+    return projects?.find((project) => project.id === activeProjectId);
+  }, [projects, activeProjectId]);
 
-  const { data: timeEntriesData } = useWorkTimeEntries();
+  const { data: timeEntriesData, isLoading: isTimeEntriesLoading } =
+    useWorkTimeEntries();
   const timeEntries = useMemo(() => {
     return timeEntriesData?.filter(
       (timeEntry) => timeEntry.project_id === activeProjectId
     );
   }, [timeEntriesData, activeProjectId]);
 
-  if (!project) return <Loader />;
+  // Loading state
+  if (isProjectsLoading || isTimeEntriesLoading) return <Loader />;
+
+  // Project not found
+  if (!project)
+    return (
+      <Text>
+        {getLocalizedText("Projekt nicht gefunden", "Project not found")}
+      </Text>
+    );
+
+  // Project found
   const salary = formatMoney(project.salary, project.currency);
   const totalActiveSeconds = timeEntries.reduce(
     (total, timeEntry) => total + timeEntry.active_seconds,

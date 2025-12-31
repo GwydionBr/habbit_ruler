@@ -72,7 +72,10 @@ export default function TimeTrackerComponentBigMin({
   const { getLocalizedText } = useIntl();
 
   return (
-    <Box bg="var(--mantine-color-body)">
+    <Box
+      bg="var(--mantine-color-body)"
+      style={{ borderRadius: "var(--mantine-radius-md)" }}
+    >
       <Card
         shadow="sm"
         padding="xs"

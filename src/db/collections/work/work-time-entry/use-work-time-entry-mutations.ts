@@ -1,8 +1,13 @@
 import { useCallback } from "react";
 import { useProfile } from "@/db/collections/profile/profile-collection";
+import { useSettings } from "@/db/collections/settings/settings-collection";
+import { useWorkTimeEntries } from "@/db/collections/work/work-time-entry/use-work-time-entry-query";
+
 import {
   showActionSuccessNotification,
   showActionErrorNotification,
+  showOverlapNotification,
+  showCompleteOverlapNotification,
 } from "@/lib/notificationFunctions";
 import { useIntl } from "@/hooks/useIntl";
 import {
@@ -10,7 +15,14 @@ import {
   updateWorkTimeEntry,
   deleteWorkTimeEntry,
 } from "./work-time-entry-mutations";
-import { InsertWorkTimeEntry, UpdateWorkTimeEntry } from "@/types/work.types";
+import {
+  InsertWorkTimeEntry,
+  UpdateWorkTimeEntry,
+  WorkTimeEntry,
+} from "@/types/work.types";
+import { TimerRoundingSettings } from "@/types/timeTracker.types";
+import { getTimeFragmentSession } from "@/lib/helper/getTimeFragmentSession";
+import { resolveTimeEntryOverlaps } from "@/lib/helper/resolveTimeEntryOverlaps";
 
 /**
  * Hook for Work Time Entry operations with automatic notifications.
@@ -22,13 +34,18 @@ import { InsertWorkTimeEntry, UpdateWorkTimeEntry } from "@/types/work.types";
  */
 export const useWorkTimeEntryMutations = () => {
   const { data: profile } = useProfile();
+  const { data: settings } = useSettings();
+  const { data: workTimeEntries } = useWorkTimeEntries();
   const { getLocalizedText } = useIntl();
 
   /**
    * Adds a new Work Time Entry with automatic notification.
    */
   const handleAddWorkTimeEntry = useCallback(
-    async (newWorkTimeEntry: InsertWorkTimeEntry) => {
+    async (
+      newWorkTimeEntry: InsertWorkTimeEntry,
+      roundingSettings: TimerRoundingSettings
+    ) => {
       if (!profile?.id) {
         showActionErrorNotification(
           getLocalizedText(
@@ -40,20 +57,68 @@ export const useWorkTimeEntryMutations = () => {
       }
 
       try {
-        const transaction = addWorkTimeEntry(newWorkTimeEntry, profile.id);
+        const newTimeEntry: WorkTimeEntry = {
+          id: crypto.randomUUID(),
+          created_at: new Date().toISOString(),
+          user_id: profile.id,
+          currency: newWorkTimeEntry.currency ?? "USD",
+          hourly_payment: newWorkTimeEntry.hourly_payment ?? false,
+          memo: newWorkTimeEntry.memo ?? null,
+          true_end_time: new Date(newWorkTimeEntry.end_time).toISOString(),
+          start_time: new Date(newWorkTimeEntry.start_time).toISOString(),
+          end_time: new Date(newWorkTimeEntry.end_time).toISOString(),
+          active_seconds: newWorkTimeEntry.active_seconds,
+          paid: newWorkTimeEntry.paid ?? false,
+          paused_seconds: newWorkTimeEntry.paused_seconds ?? 0,
+          payout_id: newWorkTimeEntry.payout_id ?? null,
+          project_id: newWorkTimeEntry.project_id ?? "",
+          real_start_time: new Date(newWorkTimeEntry.start_time).toISOString(),
+          single_cash_flow_id: null,
+          time_fragments_interval:
+            newWorkTimeEntry.time_fragments_interval ?? null,
+          salary: newWorkTimeEntry.salary ?? 0,
+        };
+        let updatedTimeEntry: WorkTimeEntry = newTimeEntry;
+        if (roundingSettings.roundInTimeFragments) {
+          updatedTimeEntry = getTimeFragmentSession(
+            roundingSettings.timeFragmentInterval,
+            newTimeEntry
+          ) as WorkTimeEntry;
+        }
+
+        const { adjustedTimeEntries, overlappingTimeEntries } =
+          resolveTimeEntryOverlaps(
+            workTimeEntries.filter(
+              (entry) => entry.project_id === newWorkTimeEntry.project_id
+            ),
+            updatedTimeEntry
+          );
+
+        if (!adjustedTimeEntries) {
+          showCompleteOverlapNotification();
+          return;
+        } else if (overlappingTimeEntries.length > 0) {
+          showOverlapNotification(
+            updatedTimeEntry,
+            overlappingTimeEntries,
+            adjustedTimeEntries
+          );
+        } else {
+          showActionSuccessNotification(
+            getLocalizedText(
+              "Arbeitszeit erfolgreich erstellt",
+              "Work time successfully created"
+            )
+          );
+        }
+
+        const transaction = addWorkTimeEntry(adjustedTimeEntries);
         const result = await transaction.isPersisted.promise;
 
         if (result.error) {
           showActionErrorNotification(result.error.message);
           return;
         }
-
-        showActionSuccessNotification(
-          getLocalizedText(
-            "Sitzung erfolgreich erstellt",
-            "Session successfully created"
-          )
-        );
 
         return result;
       } catch (error) {

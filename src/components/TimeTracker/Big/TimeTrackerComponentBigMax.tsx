@@ -92,7 +92,10 @@ export default function TimeTrackerComponentBigMax({
   };
 
   return (
-    <Box bg="var(--mantine-color-body)">
+    <Box
+      bg="var(--mantine-color-body)"
+      style={{ borderRadius: "var(--mantine-radius-md)" }}
+    >
       <Card
         shadow="sm"
         padding="lg"

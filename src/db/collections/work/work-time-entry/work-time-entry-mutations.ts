@@ -1,34 +1,17 @@
 import { workTimeEntriesCollection } from "@/db/collections/work/work-time-entry/work-time-entry-collection";
-import { InsertWorkTimeEntry, UpdateWorkTimeEntry } from "@/types/work.types";
+import { UpdateWorkTimeEntry, WorkTimeEntry } from "@/types/work.types";
 
 /**
  * Adds a new Work Time Entry.
  * Returns the transaction for further processing.
  *
- * @param newWorkTimeEntry - The data of the new time entry
- * @param userId - The user ID
+ * @param newWorkTimeEntry - The data of the new time entry or an array of time entries
  * @returns Transaction object with isPersisted promise
  */
 export const addWorkTimeEntry = (
-  newWorkTimeEntry: InsertWorkTimeEntry,
-  userId: string
+  newWorkTimeEntry: WorkTimeEntry[] | WorkTimeEntry
 ) => {
-  const transaction = workTimeEntriesCollection.insert({
-    ...newWorkTimeEntry,
-    id: crypto.randomUUID(),
-    created_at: new Date().toISOString(),
-    user_id: userId,
-    currency: newWorkTimeEntry.currency ?? "USD",
-    memo: newWorkTimeEntry.memo ?? null,
-    paid: false,
-    paused_seconds: 0,
-    payout_id: newWorkTimeEntry.payout_id ?? null,
-    project_id: newWorkTimeEntry.project_id ?? "",
-    real_start_time: new Date().toISOString(),
-    single_cash_flow_id: null,
-    time_fragments_interval: newWorkTimeEntry.time_fragments_interval ?? null,
-    hourly_payment: newWorkTimeEntry.hourly_payment ?? false,
-  });
+  const transaction = workTimeEntriesCollection.insert(newWorkTimeEntry);
 
   return transaction;
 };

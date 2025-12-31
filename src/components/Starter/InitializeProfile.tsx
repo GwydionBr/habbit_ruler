@@ -1,7 +1,7 @@
+import { useMemo, useEffect } from "react";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useIntl } from "@/hooks/useIntl";
 import { useRouter } from "@tanstack/react-router";
-import { useMemo } from "react";
 import { useForm } from "@mantine/form";
 import {
   profileCollection,
@@ -43,13 +43,19 @@ import { getGradientForColor, mantineColors } from "@/constants/colors";
 import { Locale } from "@/types/settings.types";
 
 export default function InitializeProfile() {
+  const { getLocalizedText } = useIntl();
   const router = useRouter();
   const { data: otherProfiles } = useOtherProfiles();
   const { data: profile } = useProfile();
 
+  useEffect(() => {
+    if (profile && !profile.initialized) {
+      router.navigate({ to: "/dashboard" });
+    }
+  }, [profile, router]);
+
   const { locale, format_24h, setSettingState, primaryColor, setPrimaryColor } =
     useSettingsStore();
-  const { getLocalizedText } = useIntl();
 
   const currentLocale = useMemo(
     () => locales.find((l) => l.value === locale),

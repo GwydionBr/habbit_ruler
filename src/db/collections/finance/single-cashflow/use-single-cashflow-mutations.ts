@@ -13,7 +13,8 @@ import {
   getSingleCashflowWithCategories,
 } from "./single-cashflow-mutations";
 import { InsertSingleCashFlow, SingleCashFlow } from "@/types/finance.types";
-import { Tables, TablesUpdate } from "@/types/db.types";
+import { TablesUpdate } from "@/types/db.types";
+import { constants } from "buffer";
 
 /**
  * Hook for Single Cashflow operations with automatic notifications.
@@ -32,7 +33,7 @@ export const useSingleCashflowMutations = () => {
    */
   const handleAddSingleCashflow = useCallback(
     async (
-      newSingleCashflow: InsertSingleCashFlow
+      newSingleCashflow: InsertSingleCashFlow 
     ): Promise<SingleCashFlow | undefined> => {
       if (!profile?.id) {
         showActionErrorNotification(

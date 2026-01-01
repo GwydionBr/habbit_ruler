@@ -62,17 +62,23 @@ export default function FinanceHeader() {
           <Tabs.Tab
             leftSection={<IconCashBanknote color="light-dark(blue, cyan)" />}
             value="Single"
+            fz={18}
+            fw={500}
           >
             {getLocalizedText("Einzel", "Single")}
           </Tabs.Tab>
           <Tabs.Tab
             leftSection={<IconRepeat color="light-dark(blue, cyan) " />}
             value="Recurring"
+            fz={18}
+            fw={500}
           >
             {getLocalizedText("Wiederkehrend", "Recurring")}
           </Tabs.Tab>
           <Tabs.Tab
             value="Projects"
+            fz={18}
+            fw={500}
             leftSection={
               <IconDeviceDesktopDollar color="light-dark(blue, cyan)" />
             }
@@ -82,6 +88,8 @@ export default function FinanceHeader() {
           <Tabs.Tab
             leftSection={<IconReceipt2 color="light-dark(blue, cyan)" />}
             value="Payout"
+            fz={18}
+            fw={500}
           >
             {getLocalizedText("Auszahlung", "Payout")}
           </Tabs.Tab>
@@ -90,6 +98,8 @@ export default function FinanceHeader() {
               <IconPresentationAnalytics color="light-dark(blue, cyan)" />
             }
             value="Analysis"
+              fz={18}
+            fw={500}
           >
             {getLocalizedText("Analyse", "Analysis")}
           </Tabs.Tab>

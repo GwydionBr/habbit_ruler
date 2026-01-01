@@ -15,24 +15,30 @@ import { Tables, TablesInsert, TablesUpdate } from "@/types/db.types";
  * @returns Transaction object with isPersisted promise
  */
 export const addSingleCashflow = (
-  newSingleCashflow: Omit<TablesInsert<"single_cash_flow">, "categories">,
+  newSingleCashflow:
+    | Omit<TablesInsert<"single_cash_flow">, "categories">
+    | Omit<TablesInsert<"single_cash_flow">, "categories">[],
   userId: string
 ) => {
-  const transaction = singleCashflowsCollection.insert({
-    ...newSingleCashflow,
-    id: newSingleCashflow.id || crypto.randomUUID(),
+  const cashflowsToInsert = Array.isArray(newSingleCashflow)
+    ? newSingleCashflow
+    : [newSingleCashflow];
+  const finishedCashflows = cashflowsToInsert.map((cashflow) => ({
+    ...cashflow,
+    id: cashflow.id || crypto.randomUUID(),
     created_at: new Date().toISOString(),
-    title: newSingleCashflow.title || "",
-    currency: newSingleCashflow.currency || "EUR",
-    date: newSingleCashflow.date || new Date().toISOString(),
-    finance_client_id: newSingleCashflow.finance_client_id || null,
-    finance_project_id: newSingleCashflow.finance_project_id || null,
-    recurring_cash_flow_id: newSingleCashflow.recurring_cash_flow_id || null,
-    is_active: newSingleCashflow.is_active || true,
-    payout_id: newSingleCashflow.payout_id || null,
-    changed_date: newSingleCashflow.changed_date || null,
+    title: cashflow.title || "",
+    currency: cashflow.currency || "EUR",
+    date: cashflow.date || new Date().toISOString(),
+    finance_client_id: cashflow.finance_client_id || null,
+    finance_project_id: cashflow.finance_project_id || null,
+    recurring_cash_flow_id: cashflow.recurring_cash_flow_id || null,
+    is_active: cashflow.is_active || true,
+    payout_id: cashflow.payout_id || null,
+    changed_date: cashflow.changed_date || null,
     user_id: userId,
-  });
+  }));
+  const transaction = singleCashflowsCollection.insert(finishedCashflows);
 
   return transaction;
 };

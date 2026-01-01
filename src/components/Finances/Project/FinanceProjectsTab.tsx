@@ -481,7 +481,7 @@ export default function FinanceProjectTab() {
           </FinancesNavbarDefaultCard>,
         ]}
       />
-      <Stack w="100%" ml={220} align="center">
+      <Stack w="100%"  align="center">
         <Stack gap={0} w="100%">
           {/* Bulk Selection */}
           <Collapse

@@ -369,7 +369,7 @@ export default function FinanceRecurringTab() {
         ]}
       />
       {/* Tables */}
-      <Stack gap="sm" mb="xl" ml={230} w="100%">
+      <Stack gap="sm" mb="xl"  w="100%">
         {isRecurringCashFlowsLoading ? (
           Array.from({ length: 5 }, (_, i) => (
             <Skeleton height={45} w="100%" key={i} />

@@ -49,8 +49,10 @@ export default function InitializeProfile() {
   const { data: profile } = useProfile();
 
   useEffect(() => {
-    if (profile && !profile.initialized) {
-      router.navigate({ to: "/dashboard" });
+    if (profile && profile.initialized) {
+      router.invalidate().then(() => {
+        router.navigate({ to: "/dashboard" });
+      });
     }
   }, [profile, router]);
 

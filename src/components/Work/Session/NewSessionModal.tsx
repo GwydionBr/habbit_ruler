@@ -97,13 +97,7 @@ export default function NewSessionModal({
         "up",
     };
 
-    // TODO Handle Rounding ETC.
-    // createWorkTimeEntryMutation({
-    //   newTimeEntry: newSession,
-    //   roundingSettings,
-    // });
-
-    await addWorkTimeEntry(newSession);
+    await addWorkTimeEntry(newSession, roundingSettings);
     onClose();
   }
 

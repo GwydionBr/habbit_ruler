@@ -131,6 +131,8 @@ export class SupabaseConnector
       throw error;
     }
     this.currentSession = null;
+    // Reset ready state to allow reinitialization after logout
+    this.ready = false;
   }
 
   async register(email: string, password: string) {

@@ -21,6 +21,7 @@ import {
 } from "@tabler/icons-react";
 import SchemeToggle from "@/components/Scheme/SchemeToggle";
 import { UserMenu } from "@/components/User/UserMenu";
+import { DatabaseMenu } from "@/components/Database/DatabaseMenu";
 
 export default function DashboardHeader() {
   const {
@@ -92,6 +93,7 @@ export default function DashboardHeader() {
         </Button> */}
       </Group>
       <Group gap="xs">
+        <DatabaseMenu />
         <UserMenu />
         <SchemeToggle />
         <ActionIcon

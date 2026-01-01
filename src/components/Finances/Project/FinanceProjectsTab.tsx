@@ -401,7 +401,7 @@ export default function FinanceProjectTab() {
   }, [navbarItems, filteredFinanceProjects, tab]);
 
   return (
-    <Group align="flex-start" w="100%" wrap="nowrap" mb="xl">
+    <Group wrap="nowrap" align="flex-start" mt="lg" mx="lg">
       <FinancesNavbar
         items={[
           <FinancesNavbarToolbar

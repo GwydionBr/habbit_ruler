@@ -272,7 +272,7 @@ export default function FinanceSingleTab() {
   }, [getLocalizedText, singleCashFlows, typeFilter]);
 
   return (
-    <Group>
+    <Group wrap="nowrap" align="flex-start" mt="lg" mx="lg">
       <FinancesNavbar
         items={[
           <FinancesNavbarToolbar
@@ -363,7 +363,7 @@ export default function FinanceSingleTab() {
           </FinancesNavbarDefaultCard>,
         ]}
       />
-      <ScrollArea mb="md" ml={230} w="100%">
+      <ScrollArea mb="md" w="100%">
         <Collapse
           transitionDuration={400}
           in={bulkSelectionActive && filteredSingleCashFlows.length > 0}

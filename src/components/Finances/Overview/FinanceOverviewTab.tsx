@@ -55,7 +55,7 @@ export default function FinanceOverviewTab() {
   }, []);
 
   return (
-    <Stack align="center" mb="xl">
+    <Stack align="center" mt="lg" mx="lg">
       <ChartControls
         interval={interval}
         setInterval={setInterval}

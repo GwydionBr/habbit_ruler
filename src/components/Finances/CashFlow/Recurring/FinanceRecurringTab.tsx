@@ -277,7 +277,7 @@ export default function FinanceRecurringTab() {
   }
 
   return (
-    <Group w="100%">
+    <Group wrap="nowrap" align="flex-start" mt="lg" mx="lg">
       {/* Navbar */}
       <FinancesNavbar
         items={[

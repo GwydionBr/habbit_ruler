@@ -14,7 +14,6 @@ import {
   Loader,
   Stack,
   Text,
-  Grid,
   ActionIcon,
   Card,
   Popover,
@@ -26,9 +25,9 @@ import FilterActionIcon from "@/components/UI/ActionIcons/FilterActionIcon";
 import PayoutActionIcon from "@/components/UI/ActionIcons/PayoutActionIcon";
 import SessionHierarchy from "@/components/Work/Session/SessionHirarchy/SessionHierarchy";
 import ProjectFilter from "@/components/Work/Project/ProjectFilter";
-import HourlyPayoutCard from "@/components/Finance/Payout/HourlyPayout/HourlyPayoutCard";
-import ProjectPayoutCard from "@/components/Finance/Payout/ProjectPayout/ProjectPayoutCard";
-import PayoutConversionModal from "@/components/Finance/Payout/PayoutConversionModal";
+import HourlyPayoutCard from "@/components/Finances/Payout/HourlyPayout/HourlyPayoutCard";
+import ProjectPayoutCard from "@/components/Finances/Payout/ProjectPayout/ProjectPayoutCard";
+import PayoutConversionModal from "@/components/Finances/Payout/PayoutConversionModal";
 import SelectActionIcon from "@/components/UI/ActionIcons/SelectActionIcon";
 import NewSessionModal from "@/components/Work/Session/NewSessionModal";
 import SessionSelector from "@/components/Work/Session/SessionSelector";

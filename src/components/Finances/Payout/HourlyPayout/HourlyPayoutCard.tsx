@@ -4,7 +4,7 @@ import { useIntl } from "@/hooks/useIntl";
 
 import { Text, Stack, Card, Group, Loader } from "@mantine/core";
 import { IconCashBanknotePlus } from "@tabler/icons-react";
-import QuickPayoutButton from "@/components/Finance/Payout/HourlyPayout/QuickPayoutButton";
+import QuickPayoutButton from "@/components/Finances/Payout/HourlyPayout/QuickPayoutButton";
 
 import { CompleteWorkProject, WorkTimeEntry } from "@/types/work.types";
 

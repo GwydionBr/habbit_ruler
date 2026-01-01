@@ -1,6 +1,5 @@
-import { useCallback } from "react";
+import { useCallback, useRef, useEffect } from "react";
 import { useProfile } from "@/db/collections/profile/profile-collection";
-import { useSettings } from "@/db/collections/settings/settings-collection";
 import { useWorkTimeEntries } from "@/db/collections/work/work-time-entry/use-work-time-entry-query";
 
 import {
@@ -34,9 +33,15 @@ import { resolveTimeEntryOverlaps } from "@/lib/helper/resolveTimeEntryOverlaps"
  */
 export const useWorkTimeEntryMutations = () => {
   const { data: profile } = useProfile();
-  const { data: settings } = useSettings();
   const { data: workTimeEntries } = useWorkTimeEntries();
   const { getLocalizedText } = useIntl();
+
+  // Use a ref to always have the latest workTimeEntries for overlap detection
+  const workTimeEntriesRef = useRef(workTimeEntries);
+
+  useEffect(() => {
+    workTimeEntriesRef.current = workTimeEntries;
+  }, [workTimeEntries]);
 
   /**
    * Adds a new Work Time Entry with automatic notification.
@@ -86,9 +91,11 @@ export const useWorkTimeEntryMutations = () => {
           ) as WorkTimeEntry;
         }
 
+        // Use the ref to get the latest data, even if the hook hasn't updated yet
+        const currentTimeEntries = workTimeEntriesRef.current ?? [];
         const { adjustedTimeEntries, overlappingTimeEntries } =
           resolveTimeEntryOverlaps(
-            workTimeEntries.filter(
+            currentTimeEntries.filter(
               (entry) => entry.project_id === newWorkTimeEntry.project_id
             ),
             updatedTimeEntry

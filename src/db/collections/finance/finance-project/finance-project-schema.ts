@@ -28,3 +28,19 @@ export const financeProjectDeserializationSchema = z.object({
   title: z.string(),
   user_id: z.string(),
 });
+
+export const financeProjectCategorySchema = z.object({
+  created_at: z.string(),
+  finance_category_id: z.string(),
+  finance_project_id: z.string(),
+  id: z.string(),
+  user_id: z.string(),
+});
+
+export const financeProjectCategoryDeserializationSchema = z.object({
+  created_at: z.string(),
+  finance_category_id: z.string(),
+  finance_project_id: z.string(),
+  id: z.string(),
+  user_id: z.string(),
+});

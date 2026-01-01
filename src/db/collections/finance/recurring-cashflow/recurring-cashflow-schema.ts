@@ -34,3 +34,19 @@ export const recurringCashflowDeserializationSchema = z.object({
   title: z.string(),
   user_id: z.string(),
 });
+
+export const recurringCashflowCategorySchema = z.object({
+  created_at: z.string(),
+  finance_category_id: z.string(),
+  id: z.string(),
+  recurring_cash_flow_id: z.string(),
+  user_id: z.string(),
+});
+
+export const recurringCashflowCategoryDeserializationSchema = z.object({
+  created_at: z.string(),
+  finance_category_id: z.string(),
+  id: z.string(),
+  recurring_cash_flow_id: z.string(),
+  user_id: z.string(),
+});

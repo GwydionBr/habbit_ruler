@@ -6,9 +6,11 @@ import { AppSchema } from "@/db/powersync/schema";
 import {
   singleCashflowDeserializationSchema,
   singleCashflowSchema,
+  singleCashflowCategorySchema,
+  singleCashflowCategoryDeserializationSchema,
 } from "@/db/collections/finance/single-cashflow/single-cashflow-schema";
 
-// Collection basierend auf der PowerSync-Tabelle 'payout'
+// Collection basierend auf der PowerSync-Tabelle 'single_cash_flow'
 export const singleCashflowsCollection = createCollection(
   powerSyncCollectionOptions({
     database: db,
@@ -21,5 +23,16 @@ export const singleCashflowsCollection = createCollection(
   })
 );
 
-export const useSingleCashflows = () =>
-  useLiveQuery((q) => q.from({ singleCashflows: singleCashflowsCollection }));
+// Collection basierend auf der PowerSync-Tabelle 'single_cash_flow_category'
+export const singleCashflowCategoriesCollection = createCollection(
+  powerSyncCollectionOptions({
+    database: db,
+    table: AppSchema.props.single_cash_flow_category,
+    schema: singleCashflowCategorySchema,
+    deserializationSchema: singleCashflowCategoryDeserializationSchema,
+    onDeserializationError: (error) => {
+      console.error(error);
+    },
+  })
+);
+

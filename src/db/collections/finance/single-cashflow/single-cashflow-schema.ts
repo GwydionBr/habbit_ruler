@@ -34,3 +34,19 @@ export const singleCashflowDeserializationSchema = z.object({
   title: z.string(),
   user_id: z.string(),
 });
+
+export const singleCashflowCategorySchema = z.object({
+  created_at: z.string(),
+  finance_category_id: z.string(),
+  id: z.string(),
+  single_cash_flow_id: z.string(),
+  user_id: z.string(),
+});
+
+export const singleCashflowCategoryDeserializationSchema = z.object({
+  created_at: z.string(),
+  finance_category_id: z.string(),
+  id: z.string(),
+  single_cash_flow_id: z.string(),
+  user_id: z.string(),
+});

@@ -36,7 +36,7 @@ export default function EditSessionDrawer({
   const { getLocalizedText } = useIntl();
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [currentProject, setCurrentProject] = useState<WorkProject>(project);
-  const workProjects = useWorkProjects();
+  const {data: workProjects} = useWorkProjects();
   const { updateWorkTimeEntry } = useWorkTimeEntryMutations();
 
   const drawerStack = useDrawersStack([

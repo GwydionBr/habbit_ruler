@@ -55,7 +55,7 @@ export default function NewSessionModal({
 
   const handleClose = () => {
     onClose();
-    setCurrentProject(undefined);
+    setCurrentProject(project);
     setCategoryIds([]);
   };
 

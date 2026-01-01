@@ -14,6 +14,7 @@ import {
   updateWorkTimeEntry,
   deleteWorkTimeEntry,
 } from "./work-time-entry-mutations";
+import { workTimeEntriesCollection } from "@/db/collections/work/work-time-entry/work-time-entry-collection";
 import {
   InsertWorkTimeEntry,
   UpdateWorkTimeEntry,
@@ -22,6 +23,10 @@ import {
 import { TimerRoundingSettings } from "@/types/timeTracker.types";
 import { getTimeFragmentSession } from "@/lib/helper/getTimeFragmentSession";
 import { resolveTimeEntryOverlaps } from "@/lib/helper/resolveTimeEntryOverlaps";
+
+import { createTransaction } from "@tanstack/react-db";
+import { PowerSyncTransactor } from "@tanstack/powersync-db-collection";
+import { db } from "@/db/powersync/db";
 
 /**
  * Hook for Work Time Entry operations with automatic notifications.
@@ -35,6 +40,18 @@ export const useWorkTimeEntryMutations = () => {
   const { data: profile } = useProfile();
   const { data: workTimeEntries } = useWorkTimeEntries();
   const { getLocalizedText } = useIntl();
+
+  // Create a transaction that won't auto-commit
+  const customTransaction = () =>
+    createTransaction({
+      autoCommit: false,
+      mutationFn: async ({ transaction }) => {
+        // Use PowerSyncTransactor to apply the transaction to PowerSync
+        await new PowerSyncTransactor({ database: db }).applyTransaction(
+          transaction
+        );
+      },
+    });
 
   // Use a ref to always have the latest workTimeEntries for overlap detection
   const workTimeEntriesRef = useRef(workTimeEntries);
@@ -146,20 +163,78 @@ export const useWorkTimeEntryMutations = () => {
   const handleUpdateWorkTimeEntry = useCallback(
     async (id: string | string[], item: UpdateWorkTimeEntry) => {
       try {
-        const transaction = updateWorkTimeEntry(id, item);
-        const result = await transaction.isPersisted.promise;
+        const transaction = customTransaction();
 
-        if (result.error) {
-          showActionErrorNotification(result.error.message);
+        const oldTimeEntry = workTimeEntriesRef.current?.find(
+          (entry) => entry.id === id
+        );
+
+        if (!oldTimeEntry) {
+          showActionErrorNotification(
+            getLocalizedText(
+              "Arbeitszeit nicht gefunden",
+              "Work time not found"
+            )
+          );
           return;
         }
 
-        showActionSuccessNotification(
-          getLocalizedText(
-            "Sitzung erfolgreich aktualisiert",
-            "Session successfully updated"
-          )
-        );
+        const updatedTimeEntry: WorkTimeEntry = {
+          ...oldTimeEntry,
+          ...item,
+        };
+
+        const currentTimeEntries = workTimeEntriesRef.current ?? [];
+        const { adjustedTimeEntries, overlappingTimeEntries } =
+          resolveTimeEntryOverlaps(
+            currentTimeEntries.filter(
+              (entry) => entry.project_id === oldTimeEntry.project_id && entry.id !== oldTimeEntry.id
+            ),
+            updatedTimeEntry
+          );
+
+        if (!adjustedTimeEntries) {
+          showCompleteOverlapNotification();
+          return;
+        } else if (overlappingTimeEntries.length > 0) {
+          if (adjustedTimeEntries.length > 1) {
+            transaction.mutate(() => {
+              deleteWorkTimeEntry(oldTimeEntry.id);
+              addWorkTimeEntry(adjustedTimeEntries);
+            });
+          } else if (adjustedTimeEntries.length === 1) {
+            transaction.mutate(() =>
+              updateWorkTimeEntry(id, {
+                ...adjustedTimeEntries[0],
+                id: oldTimeEntry.id,
+              })
+            );
+          } else {
+            showActionErrorNotification(
+              getLocalizedText(
+                "Fehler beim Aktualisieren der Arbeitszeit",
+                "Error updating work time"
+              )
+            );
+            return;
+          }
+          transaction.commit();
+          showOverlapNotification(
+            updatedTimeEntry,
+            overlappingTimeEntries,
+            adjustedTimeEntries
+          );
+        } else {
+          updateWorkTimeEntry(id, item);
+          showActionSuccessNotification(
+            getLocalizedText(
+              "Arbeitszeit erfolgreich erstellt",
+              "Work time successfully created"
+            )
+          );
+        }
+
+        const result = await transaction.isPersisted.promise;
 
         return result;
       } catch (error) {

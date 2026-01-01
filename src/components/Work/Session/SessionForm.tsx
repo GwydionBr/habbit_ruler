@@ -46,7 +46,7 @@ export default function SessionForm({
   onProjectChange,
 }: SessionFormProps) {
   const { getLocalizedText } = useIntl();
-  const {data: workProjects, isLoading: isWorkProjectsLoading} = useWorkProjects();
+  const {data: workProjects} = useWorkProjects();
   const [userChangedStartTime, setUserChangedStartTime] = useState(false);
   const [userChangedEndTime, setUserChangedEndTime] = useState(false);
   const [formInitialized, setFormInitialized] = useState(false);

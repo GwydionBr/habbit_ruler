@@ -6,7 +6,7 @@ import SettingsNavbar from "@/components/Navbar/SettingsNavbar";
 import FinanceCategorySettings from "./FinanceCategory/FinanceCategorySettings";
 import FinanceRuleSettings from "./FinanceRuleSettings/FinanceRuleSettings";
 import FinanceDefaultSettings from "./FinanceDefaultSettings/FinanceDefaultSettings";
-import FinanceClientSettings from "./FinanceClient/FinanceClientSettings";
+import FinanceClientSettings from "./Contact/ContactSettings";
 import { IconCategory, IconUsers, IconBuildingBank } from "@tabler/icons-react";
 import FinanceBankAccountSettings from "./FinanceBankAccount/FinanceBankAccountSettings";
 

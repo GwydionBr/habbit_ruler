@@ -13,7 +13,7 @@ import {
   addYearsToDate,
   isDateInInterval,
 } from "@/lib/financeChartHelperFunctions";
-import { useSingleCashflows } from "@/db/collections/finance/single-cashflow/single-cashflow-collection";
+import { useSingleCashflows } from "@/db/collections/finance/single-cashflow/use-single-cashflow-query";
 
 /**
  * Represents a single data point in the chart

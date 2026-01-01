@@ -16,7 +16,7 @@ import React from "react";
 import DeleteActionIcon from "@/components/UI/ActionIcons/DeleteActionIcon";
 import PencilActionIcon from "@/components/UI/ActionIcons/PencilActionIcon";
 import { IconPencil } from "@tabler/icons-react";
-import FinanceClientForm from "@/components/Finances/FinanceClient/FinanceClientForm";
+import FinanceClientForm from "@/components/Finances/Contact/ContactForm";
 
 interface FinanceClientRowProps {
   client: Tables<"finance_client">;

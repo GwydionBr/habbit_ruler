@@ -11,7 +11,7 @@ import {
 } from "@tabler/icons-react";
 import FinanceOverviewTab from "@/components/Finances/Overview/FinanceOverviewTab";
 // import FinanceRecurringTab from "@/components/Finances/CashFlow/Recurring/FinanceRecurringTab";
-// import FinanceProjectTab from "@/components/Finances/Project/FinanceProjectsTab";
+import FinanceProjectTab from "@/components/Finances/Project/FinanceProjectsTab";
 import { FinanceTab } from "@/types/finance.types";
 // import PayoutTab from "./Payout/PayoutTab/PayoutTab";
 // import FinanceSingleTab from "./CashFlow/Single/FinanceSingleTab";
@@ -72,7 +72,7 @@ export default function FinanceTabs() {
       </Tabs.List>
 
       <Tabs.Panel value="Projects">
-        {/* <FinanceProjectTab /> */}
+        <FinanceProjectTab />
         null
       </Tabs.Panel>
       <Tabs.Panel value="Single">

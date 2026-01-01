@@ -7,7 +7,7 @@ import {
 import { Group, Text } from "@mantine/core";
 import { IconUserPlus, IconUsers } from "@tabler/icons-react";
 import FinanceSettingsList from "@/components/Settings/Finances/FinanceSettingsList";
-import FinanceClientForm from "@/components/Finances/FinanceClient/FinanceClientForm";
+import ContactsForm from "@/components/Finances/Contact/ContactForm";
 import { Tables } from "@/types/db.types";
 
 export default function FinanceClientSettings() {
@@ -52,10 +52,10 @@ export default function FinanceClientSettings() {
   const renderEditForm = (
     client: Tables<"finance_client">,
     onClose: () => void
-  ) => <FinanceClientForm onClose={onClose} client={client} />;
+  ) => <ContactsForm onClose={onClose} client={client} />;
 
   const renderAddForm = (onClose: () => void) => (
-    <FinanceClientForm onClose={onClose} />
+    <ContactsForm onClose={onClose} />
   );
 
   return (

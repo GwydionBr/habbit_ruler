@@ -18,7 +18,6 @@ import { FinanceInterval } from "@/types/settings.types";
 import { Tables } from "@/types/db.types";
 import { useFinanceCategories } from "@/db/collections/finance/finance-category/finance-category-collection";
 // import { useUpdateRecurringCashflowMutation } from "@/utils/queries/finances/use-recurring-cashflow";
-
 interface RecurringCashFlowRowProps extends CardProps {
   cashflow: RecurringCashFlow;
   showEndDate?: boolean;
@@ -52,7 +51,7 @@ export default function RecurringCashFlowRow({
   const currentCategories = useMemo(() => {
     return financeCategories.filter((category) =>
       cashflow.categories
-        .map((category) => category.finance_category.id)
+        .map((category) => category.id)
         .includes(category.id)
     );
   }, [financeCategories, cashflow.categories]);

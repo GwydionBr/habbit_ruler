@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useHover, useDisclosure } from "@mantine/hooks";
 import { useIntl } from "@/hooks/useIntl";
 import { useSingleCashflowMutations } from "@/db/collections/finance/single-cashflow/use-single-cashflow-mutations";
@@ -31,7 +31,9 @@ interface SingleCashflowRowProps extends CardProps {
   onEdit: () => void;
   selectedModeActive: boolean;
   isSelected: boolean;
-  onToggleSelected: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onToggleSelected: (
+    e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLDivElement>
+  ) => void;
 }
 
 export default function SingleCashflowRow({
@@ -53,27 +55,21 @@ export default function SingleCashflowRow({
     isCategoryPopoverOpen,
     { open: openCategoryPopover, close: closeCategoryPopover },
   ] = useDisclosure(false);
-
-  const currentCategories = useMemo(
-    () => cashflow.categories.map((c) => c.finance_category),
-    [cashflow.categories]
-  );
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleCategoryClose = async (
     updatedCategories: Tables<"finance_category">[] | null
   ) => {
+    if (isUpdating) return;
+    setIsUpdating(true);
     closeCategoryPopover();
     if (updatedCategories) {
-      // TODO: Implement update single cashflow
-      // updateSingleCashFlowMutation({
-      //   singleCashFlow: {
-      //     ...cashflow,
-      //     categories: updatedCategories.map((c) => ({
-      //       finance_category: c,
-      //     })),
-      //   },
-      // });
+      await updateSingleCashflow(cashflow.id, {
+        ...cashflow,
+        categories: updatedCategories,
+      });
     }
+    setTimeout(() => setIsUpdating(false), 500);
   };
 
   return (
@@ -90,7 +86,7 @@ export default function SingleCashflowRow({
       onClick={(e) => {
         if (!isCategoryPopoverOpen) {
           if (selectedModeActive) {
-            onToggleSelected(e as any);
+            onToggleSelected(e);
           } else {
             onEdit();
           }
@@ -128,7 +124,7 @@ export default function SingleCashflowRow({
         <Grid.Col span={3}>
           <Stack>
             <FinanceCategoryBadges
-              initialCategories={currentCategories}
+              initialCategories={cashflow.categories}
               onPopoverOpen={openCategoryPopover}
               onPopoverClose={handleCategoryClose}
               showAddCategory={hovered}

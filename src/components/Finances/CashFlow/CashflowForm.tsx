@@ -63,9 +63,7 @@ export default function FinanceForm({
     await addSingleCashflow({
       ...values,
       date: values.date.toISOString(),
-      categories: categories.map((category) => ({
-        finance_category: category,
-      })),
+      categories,
     });
     onClose();
   }
@@ -78,9 +76,7 @@ export default function FinanceForm({
       ...values,
       end_date: values.end_date?.toISOString(),
       start_date: values.start_date.toISOString(),
-      categories: categories.map((category) => ({
-        finance_category: category,
-      })),
+      categories,
     });
     onClose();
   }

@@ -17,9 +17,9 @@ import { createTransaction } from "@tanstack/react-db";
  *
  * @param newSingleCashflow - The data of the new cashflow
  * @param userId - The user ID
- * @returns Transaction object with isPersisted promise and data
+ * @returns Transaction object with isPersisted promise and created cashflows
  */
-export const addSingleCashflow = async (
+export const addSingleCashflowMutation = async (
   newSingleCashflow: InsertSingleCashFlow | InsertSingleCashFlow[],
   userId: string
 ) => {
@@ -68,7 +68,7 @@ export const addSingleCashflow = async (
           id: crypto.randomUUID(),
           created_at: new Date().toISOString(),
           single_cash_flow_id: cashflowId,
-          finance_category_id: category.finance_category.id,
+          finance_category_id: category.id,
           user_id: userId,
         });
       });
@@ -89,7 +89,7 @@ export const addSingleCashflow = async (
  * @param userId - The user ID
  * @returns Transaction object with isPersisted promise
  */
-export const updateSingleCashflow = async (
+export const updateSingleCashflowMutation = async (
   id: string | string[],
   item: UpdateSingleCashFlow,
   userId: string
@@ -115,9 +115,7 @@ export const updateSingleCashflow = async (
   // Commit the cashflow update first
   await customTransaction.commit();
   await customTransaction.isPersisted.promise;
-  const categoryIds = categories.map(
-    (category) => category.finance_category.id
-  );
+  const categoryIds = categories.map((category) => category.id);
   await syncSingleCashflowCategories(ids, categoryIds, userId);
 
   return customTransaction;
@@ -129,7 +127,7 @@ export const updateSingleCashflow = async (
  * @param id - The ID or IDs of the cashflow to delete
  * @returns Transaction object with isPersisted promise
  */
-export const deleteSingleCashflow = (id: string | string[]) => {
+export const deleteSingleCashflowMutation = (id: string | string[]) => {
   return singleCashflowsCollection.delete(id);
 };
 

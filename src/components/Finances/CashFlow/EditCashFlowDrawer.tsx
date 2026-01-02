@@ -67,7 +67,7 @@ export default function EditCashFlowDrawer({
   );
   const [type, setType] = useState<CashFlowType>("income");
   const [categories, setCategories] = useState<Tables<"finance_category">[]>(
-    cashFlow.categories.map((category) => category.finance_category)
+    cashFlow.categories
   );
   const [pendingValues, setPendingValues] = useState<
     UpdateSingleCashFlow | UpdateRecurringCashFlow
@@ -114,13 +114,8 @@ export default function EditCashFlowDrawer({
   }, [opened]);
 
   useEffect(() => {
-    if (
-      categories !==
-      cashFlow.categories.map((category) => category.finance_category)
-    ) {
-      setCategories(
-        cashFlow.categories.map((category) => category.finance_category)
-      );
+    if (categories !== cashFlow.categories) {
+      setCategories(cashFlow.categories);
     }
   }, [cashFlow]);
 
@@ -131,9 +126,7 @@ export default function EditCashFlowDrawer({
       await updateSingleCashflow(cashFlow.id, {
         ...values,
         date: values.date.toISOString(),
-        categories: categories.map((category) => ({
-          finance_category: category,
-        })),
+        categories,
       });
     } else {
       // For recurring cash flows, check if any fields that affect single cash flows have changed
@@ -141,16 +134,13 @@ export default function EditCashFlowDrawer({
         values.title !== cashFlow.title ||
         values.amount !== cashFlow.amount ||
         values.currency !== cashFlow.currency ||
-        categories !==
-          cashFlow.categories.map((category) => category.finance_category);
+        categories !== cashFlow.categories;
 
       if (hasChanges) {
         // Store the values and show the update modal
         setPendingValues({
           id: cashFlow.id,
-          categories: categories.map((category) => ({
-            finance_category: category,
-          })),
+          categories,
           ...values,
         });
         drawerStack.open("update-cash-flow");

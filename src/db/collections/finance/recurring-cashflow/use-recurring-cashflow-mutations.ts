@@ -6,17 +6,17 @@ import {
 } from "@/lib/notificationFunctions";
 import { useIntl } from "@/hooks/useIntl";
 import {
-  addRecurringCashflow,
-  updateRecurringCashflow,
-  deleteRecurringCashflow,
-  syncRecurringCashflowCategories,
-  getRecurringCashflowWithCategories,
+  addRecurringCashflowMutation,
+  updateRecurringCashflowMutation,
+  deleteRecurringCashflowMutation,
 } from "./recurring-cashflow-mutations";
 import {
   InsertRecurringCashFlow,
   RecurringCashFlow,
 } from "@/types/finance.types";
 import { TablesUpdate } from "@/types/db.types";
+import { processRecurringCashFlows } from "@/lib/helper/processRecurringCashflows";
+import { addSingleCashflowMutation } from "../single-cashflow/single-cashflow-mutations";
 
 /**
  * Hook for Recurring Cashflow operations with automatic notifications.
@@ -48,35 +48,20 @@ export const useRecurringCashflowMutations = () => {
       }
 
       try {
-        const cashflowId = newRecurringCashflow.id || crypto.randomUUID();
-        const transaction = addRecurringCashflow(
-          { ...newRecurringCashflow, id: cashflowId },
+        const { promise, data } = await addRecurringCashflowMutation(
+          { ...newRecurringCashflow },
           profile.id
         );
-        const result = await transaction.isPersisted.promise;
 
-        if (result.error) {
-          showActionErrorNotification(result.error.message);
+        if (promise.error) {
+          console.error("Error adding recurring cashflow", promise.error);
+          showActionErrorNotification(promise.error.message);
           return;
         }
 
-        // Sync categories if provided
-        if (
-          newRecurringCashflow.categories &&
-          newRecurringCashflow.categories.length > 0
-        ) {
-          await syncRecurringCashflowCategories(
-            cashflowId,
-            newRecurringCashflow.categories.map(
-              (category) => category.finance_category.id
-            ),
-            profile.id
-          );
-        }
+        const singleCashflowsToInsert = processRecurringCashFlows([data], []);
 
-        // Get complete cashflow with categories
-        const completeCashflow =
-          await getRecurringCashflowWithCategories(cashflowId);
+        await addSingleCashflowMutation(singleCashflowsToInsert, profile.id);
 
         showActionSuccessNotification(
           getLocalizedText(
@@ -84,9 +69,8 @@ export const useRecurringCashflowMutations = () => {
             "Recurring cashflow successfully created"
           )
         );
-
-        return completeCashflow;
       } catch (error) {
+        console.error("Error adding recurring cashflow try/catch", error);
         showActionErrorNotification(
           getLocalizedText(
             `Fehler: ${error instanceof Error ? error.message : "Unbekannter Fehler"}`,
@@ -118,7 +102,7 @@ export const useRecurringCashflowMutations = () => {
       }
 
       try {
-        const transaction = updateRecurringCashflow(id, item);
+        const transaction = updateRecurringCashflowMutation(id, item);
         const result = await transaction.isPersisted.promise;
 
         if (result.error) {
@@ -126,19 +110,19 @@ export const useRecurringCashflowMutations = () => {
           return;
         }
 
-        // Sync categories if provided
-        const cashflowId = typeof id === "string" ? id : id[0];
-        if (categoryIds !== undefined) {
-          await syncRecurringCashflowCategories(
-            cashflowId,
-            categoryIds,
-            profile.id
-          );
-        }
+        // // Sync categories if provided
+        // const cashflowId = typeof id === "string" ? id : id[0];
+        // if (categoryIds !== undefined) {
+        //   await syncRecurringCashflowCategoriesMutation(
+        //     cashflowId,
+        //     categoryIds,
+        //     profile.id
+        //   );
+        // }
 
-        // Get complete cashflow with categories
-        const completeCashflow =
-          await getRecurringCashflowWithCategories(cashflowId);
+        // // Get complete cashflow with categories
+        // const completeCashflow =
+        //   await getRecurringCashflowWithCategories(cashflowId);
 
         showActionSuccessNotification(
           getLocalizedText(
@@ -147,7 +131,7 @@ export const useRecurringCashflowMutations = () => {
           )
         );
 
-        return completeCashflow;
+        // return completeCashflow;
       } catch (error) {
         showActionErrorNotification(
           getLocalizedText(
@@ -166,7 +150,7 @@ export const useRecurringCashflowMutations = () => {
   const handleDeleteRecurringCashflow = useCallback(
     async (id: string | string[]) => {
       try {
-        const transaction = deleteRecurringCashflow(id);
+        const transaction = deleteRecurringCashflowMutation(id);
         const result = await transaction.isPersisted.promise;
 
         if (result.error) {
@@ -198,8 +182,5 @@ export const useRecurringCashflowMutations = () => {
     addRecurringCashflow: handleAddRecurringCashflow,
     updateRecurringCashflow: handleUpdateRecurringCashflow,
     deleteRecurringCashflow: handleDeleteRecurringCashflow,
-    // Helper functions
-    syncRecurringCashflowCategories,
-    getRecurringCashflowWithCategories,
   };
 };

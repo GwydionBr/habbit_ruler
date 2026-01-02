@@ -1,15 +1,17 @@
 import { useCallback } from "react";
 import { useProfile } from "@/db/collections/profile/profile-collection";
+import { useIntl } from "@/hooks/useIntl";
+
+import {
+  addSingleCashflowMutation,
+  updateSingleCashflowMutation,
+  deleteSingleCashflowMutation,
+} from "./single-cashflow-mutations";
 import {
   showActionSuccessNotification,
   showActionErrorNotification,
 } from "@/lib/notificationFunctions";
-import { useIntl } from "@/hooks/useIntl";
-import {
-  addSingleCashflow,
-  updateSingleCashflow,
-  deleteSingleCashflow,
-} from "./single-cashflow-mutations";
+
 import {
   InsertSingleCashFlow,
   SingleCashFlow,
@@ -48,13 +50,14 @@ export const useSingleCashflowMutations = () => {
 
       try {
         // Add single cashflows to database
-        const { promise, data } = await addSingleCashflow(
+        const { promise, data } = await addSingleCashflowMutation(
           newSingleCashflow,
           profile.id
         );
 
         // Check if transaction failed
         if (promise.error) {
+          console.error("Error adding single cashflow", promise.error);
           showActionErrorNotification(promise.error.message);
           return;
         }
@@ -79,6 +82,7 @@ export const useSingleCashflowMutations = () => {
         }
         console.log(data);
       } catch (error) {
+        console.error("Error adding single cashflow try/catch", error);
         // Show total error notification
         showActionErrorNotification(
           getLocalizedText(
@@ -110,7 +114,11 @@ export const useSingleCashflowMutations = () => {
       }
 
       try {
-        const transaction = await updateSingleCashflow(id, item, profile.id);
+        const transaction = await updateSingleCashflowMutation(
+          id,
+          item,
+          profile.id
+        );
         const result = await transaction.isPersisted.promise;
 
         if (result.error) {
@@ -142,7 +150,7 @@ export const useSingleCashflowMutations = () => {
   const handleDeleteSingleCashflow = useCallback(
     async (id: string | string[]) => {
       try {
-        const transaction = deleteSingleCashflow(id);
+        const transaction = deleteSingleCashflowMutation(id);
         const result = await transaction.isPersisted.promise;
 
         if (result.error) {

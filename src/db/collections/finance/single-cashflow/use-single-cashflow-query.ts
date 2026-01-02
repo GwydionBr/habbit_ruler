@@ -72,9 +72,7 @@ export const useSingleCashflowsQuery = () => {
       if (!categoriesByCashflow.has(cashflowId)) {
         categoriesByCashflow.set(cashflowId, []);
       }
-      categoriesByCashflow.get(cashflowId)!.push({
-        finance_category: category,
-      });
+      categoriesByCashflow.get(cashflowId)!.push(category);
     });
 
     // Return cashflows with categories

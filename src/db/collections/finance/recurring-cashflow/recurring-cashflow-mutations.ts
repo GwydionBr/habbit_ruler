@@ -1,10 +1,15 @@
 import { db } from "@/db/powersync/db";
+import { PowerSyncTransactor } from "@tanstack/powersync-db-collection";
+import { createTransaction } from "@tanstack/react-db";
 import {
   recurringCashflowsCollection,
   recurringCashflowCategoriesCollection,
 } from "./recurring-cashflow-collection";
-import { RecurringCashFlow } from "@/types/finance.types";
-import { Tables, TablesInsert, TablesUpdate } from "@/types/db.types";
+import {
+  InsertRecurringCashFlow,
+  RecurringCashFlow,
+} from "@/types/finance.types";
+import { Tables, TablesUpdate } from "@/types/db.types";
 
 /**
  * Adds a new Recurring Cashflow.
@@ -12,14 +17,24 @@ import { Tables, TablesInsert, TablesUpdate } from "@/types/db.types";
  *
  * @param newRecurringCashflow - The data of the new cashflow
  * @param userId - The user ID
- * @returns Transaction object with isPersisted promise
+ * @returns Transaction object with isPersisted promise and created cashflow
  */
-export const addRecurringCashflow = (
-  newRecurringCashflow: Omit<TablesInsert<"recurring_cash_flow">, "categories">,
+export const addRecurringCashflowMutation = async (
+  newRecurringCashflow: InsertRecurringCashFlow,
   userId: string
 ) => {
-  const transaction = recurringCashflowsCollection.insert({
-    ...newRecurringCashflow,
+  const customTransaction = createTransaction({
+    autoCommit: false,
+    mutationFn: async ({ transaction }) => {
+      // Use PowerSyncTransactor to apply the transaction to PowerSync
+      await new PowerSyncTransactor({ database: db }).applyTransaction(
+        transaction
+      );
+    },
+  });
+  const { categories, ...cashflowData } = newRecurringCashflow;
+  const dataToInsert = {
+    ...cashflowData,
     currency: newRecurringCashflow.currency || "EUR",
     start_date: newRecurringCashflow.start_date || new Date().toISOString(),
     end_date: newRecurringCashflow.end_date || null,
@@ -30,9 +45,28 @@ export const addRecurringCashflow = (
     id: newRecurringCashflow.id || crypto.randomUUID(),
     created_at: new Date().toISOString(),
     user_id: userId,
+  };
+
+  customTransaction.mutate(() => {
+    recurringCashflowsCollection.insert(dataToInsert);
+    categories.forEach((category) => {
+      recurringCashflowCategoriesCollection.insert({
+        id: crypto.randomUUID(),
+        created_at: new Date().toISOString(),
+        recurring_cash_flow_id: dataToInsert.id,
+        finance_category_id: category.id,
+        user_id: userId,
+      });
+    });
   });
 
-  return transaction;
+  await customTransaction.commit();
+  const promise = await customTransaction.isPersisted.promise;
+
+  return {
+    promise,
+    data: { ...dataToInsert, categories } as RecurringCashFlow,
+  };
 };
 
 /**
@@ -42,7 +76,7 @@ export const addRecurringCashflow = (
  * @param item - The item to update
  * @returns Transaction object with isPersisted promise
  */
-export const updateRecurringCashflow = (
+export const updateRecurringCashflowMutation = (
   id: string | string[],
   item: TablesUpdate<"recurring_cash_flow">
 ) => {
@@ -57,7 +91,7 @@ export const updateRecurringCashflow = (
  * @param id - The ID or IDs of the cashflow to delete
  * @returns Transaction object with isPersisted promise
  */
-export const deleteRecurringCashflow = (id: string | string[]) => {
+export const deleteRecurringCashflowMutation = (id: string | string[]) => {
   return recurringCashflowsCollection.delete(id);
 };
 
@@ -153,7 +187,7 @@ export async function getRecurringCashflowWithCategories(
           .getAll<
             Tables<"finance_category">
           >(`SELECT * FROM finance_category WHERE id IN (${categoryIds.map(() => "?").join(",")})`, categoryIds)
-          .then((cats) => cats.map((cat) => ({ finance_category: cat })))
+          .then((cats) => cats.map((cat) => cat))
       : [];
 
   return {

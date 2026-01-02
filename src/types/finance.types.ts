@@ -14,24 +14,24 @@ export type UpdateBankAccount = TablesUpdate<"bank_account">;
 
 // Single Cash Flow Types
 export interface SingleCashFlow extends Tables<"single_cash_flow"> {
-  categories: { finance_category: Tables<"finance_category"> }[];
+  categories: Tables<"finance_category">[];
 }
 export interface InsertSingleCashFlow extends TablesInsert<"single_cash_flow"> {
-  categories: { finance_category: Tables<"finance_category"> }[];
+  categories: Tables<"finance_category">[];
 }
 export interface UpdateSingleCashFlow extends TablesUpdate<"single_cash_flow"> {
-  categories: { finance_category: Tables<"finance_category"> }[];
+  categories: Tables<"finance_category">[];
 }
 
 // Recurring Cash Flow Types
 export interface RecurringCashFlow extends Tables<"recurring_cash_flow"> {
-  categories: { finance_category: Tables<"finance_category"> }[];
+  categories: Tables<"finance_category">[];
 }
 export interface InsertRecurringCashFlow extends TablesInsert<"recurring_cash_flow"> {
-  categories: { finance_category: Tables<"finance_category"> }[];
+  categories: Tables<"finance_category">[];
 }
 export interface UpdateRecurringCashFlow extends TablesUpdate<"recurring_cash_flow"> {
-  categories: { finance_category: Tables<"finance_category"> }[];
+  categories: Tables<"finance_category">[];
 }
 
 // Finance Project Types

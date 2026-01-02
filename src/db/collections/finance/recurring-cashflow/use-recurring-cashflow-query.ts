@@ -67,9 +67,7 @@ export const useRecurringCashflows = () => {
       if (!categoriesByCashflow.has(cashflowId)) {
         categoriesByCashflow.set(cashflowId, []);
       }
-      categoriesByCashflow.get(cashflowId)!.push({
-        finance_category: category,
-      });
+      categoriesByCashflow.get(cashflowId)!.push(category);
     });
 
     return cashflows.map((cashflow) => ({

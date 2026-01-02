@@ -1,148 +1,165 @@
-// import { useEffect } from "react";
-// import { useMutation, useQueryClient } from "@tanstack/react-query";
-// import { useIntl } from "@/hooks/useIntl";
-// import { useRecurringCashflows } from "@/db/collections/finance/recurring-cashflow/use-recurring-cashflow-query";
-// import { useSingleCashflows } from "@/db/collections/finance/single-cashflow/use-single-cashflow-query";
+import { useEffect, useCallback, useRef } from "react";
+import { useProfile } from "@/db/collections/profile/profile-collection";
+import { useRecurringCashflows } from "@/db/collections/finance/recurring-cashflow/use-recurring-cashflow-query";
+import { useSingleCashflowsQuery } from "@/db/collections/finance/single-cashflow/use-single-cashflow-query";
+import { processRecurringCashFlows } from "@/lib/helper/processRecurringCashflows";
+import { addSingleCashflowMutation } from "@/db/collections/finance/single-cashflow/single-cashflow-mutations";
+import { isSameDay } from "date-fns";
 
-// import { processRecurringCashFlows } from "@/lib/helper/processRecurringCashflows";
-// import { useSingleCashflowMutations } from "@/db/collections/finance/single-cashflow/use-single-cashflow-mutations";
-// import {
-//   showActionErrorNotification,
-//   showActionSuccessNotification,
-// } from "@/lib/notificationFunctions";
-// import { SingleCashFlow } from "@/types/finance.types";
+const LAST_PROCESSED_KEY = "recurringCashflowsLastProcessed";
 
-// const LAST_PROCESSED_KEY = "lastRecurringCashflowProcessed";
+/**
+ * Hook that ensures recurring cashflows are processed daily to create single cashflows.
+ *
+ * This hook checks if today has already been checked for new single cashflows to create
+ * from recurring cashflows. If not checked today, it processes all recurring cashflows
+ * and creates the necessary single cashflows. If already checked today, it skips processing.
+ *
+ * @returns Object with triggerProcessing function to manually trigger processing
+ */
+export const useProcessRecurringCashflows = () => {
+  const { data: profile } = useProfile();
+  const { data: recurringCashflows = [], isReady: isRecurringReady } =
+    useRecurringCashflows();
+  const { data: existingSingleCashflows = [], isReady: isSingleReady } =
+    useSingleCashflowsQuery();
+  const processingRef = useRef(false);
+  const hasProcessedTodayRef = useRef(false);
 
-// export function useProcessRecurringCashflows() {
-//   const queryClient = useQueryClient();
-//   const { getLocalizedText } = useIntl();
+  /**
+   * Checks if today has already been processed
+   */
+  const hasProcessedToday = useCallback((): boolean => {
+    try {
+      const lastProcessedDate = localStorage.getItem(LAST_PROCESSED_KEY);
+      if (!lastProcessedDate) return false;
 
-//   // Get recurring and single cashflows
-//   const { data: recurringCashFlows } = useRecurringCashflows();
-//   const { data: singleCashFlows } = useSingleCashflows();
+      const lastProcessed = new Date(lastProcessedDate);
+      const today = new Date();
+      return isSameDay(lastProcessed, today);
+    } catch (error) {
+      console.error("Error checking last processed date:", error);
+      return false;
+    }
+  }, []);
 
-//   // Mutation to create multiple single cashflows
-//   const createMultipleMutation = useMutation<
-//     SingleCashFlow[],
-//     Error,
-//     Parameters<typeof createMultipleSingleCashFlows>[0]
-//   >({
-//     mutationKey: ["createMultipleSingleCashFlows"],
-//     mutationFn: createMultipleSingleCashFlows,
-//     onSuccess: (data) => {
-//       // Update the single cashflows cache
-//       queryClient.setQueryData(["singleCashFlows"], (old: any[]) => [
-//         ...data,
-//         ...(old || []),
-//       ]);
+  /**
+   * Marks today as processed in localStorage
+   */
+  const markAsProcessed = useCallback(() => {
+    try {
+      const today = new Date().toISOString();
+      localStorage.setItem(LAST_PROCESSED_KEY, today);
+      hasProcessedTodayRef.current = true;
+    } catch (error) {
+      console.error("Error marking as processed:", error);
+    }
+  }, []);
 
-//       // Invalidate to ensure fresh data
-//       queryClient.invalidateQueries({
-//         queryKey: ["singleCashFlows"],
-//       });
+  /**
+   * Processes recurring cashflows and creates new single cashflows
+   */
+  const processRecurringCashflows = useCallback(async () => {
+    if (!profile?.id) {
+      console.warn(
+        "No user profile found, skipping recurring cashflow processing"
+      );
+      return;
+    }
 
-//       if (data.length > 0) {
-//         showActionSuccessNotification(
-//           getLocalizedText(
-//             `${data.length} wiederkehrende Cashflows verarbeitet`,
-//             `${data.length} recurring cashflows processed`
-//           )
-//         );
-//       }
-//     },
-//     onError: (error) => {
-//       console.error("Error processing recurring cashflows:", error);
-//       showActionErrorNotification(
-//         getLocalizedText(
-//           "Fehler beim Verarbeiten der wiederkehrenden Cashflows",
-//           "Error processing recurring cashflows"
-//         )
-//       );
-//     },
-//   });
+    if (processingRef.current) {
+      console.log("Processing already in progress, skipping");
+      return;
+    }
 
-//   // Check if we need to process recurring cashflows (check if already processed today)
-//   const shouldProcess = () => {
-//     if (typeof window === "undefined") return false;
+    if (hasProcessedTodayRef.current || hasProcessedToday()) {
+      console.log("Already processed today, skipping");
+      return;
+    }
 
-//     const today = new Date();
-//     const todayString = today.toDateString(); // Format: "Mon Jan 01 2024"
-//     const lastProcessed = localStorage.getItem(LAST_PROCESSED_KEY);
+    if (!isRecurringReady || !isSingleReady) {
+      console.log("Data not ready yet, skipping");
+      return;
+    }
 
-//     if (!lastProcessed) {
-//       return true;
-//     }
+    if (recurringCashflows.length === 0) {
+      console.log("No recurring cashflows to process");
+      markAsProcessed();
+      return;
+    }
 
-//     const lastProcessedDate = new Date(lastProcessed);
-//     const lastProcessedString = lastProcessedDate.toDateString();
+    processingRef.current = true;
 
-//     // Return true if not processed today
-//     return lastProcessedString !== todayString;
-//   };
+    try {
+      // Process recurring cashflows to get new single cashflows to create
+      const singleCashflowsToInsert = processRecurringCashFlows(
+        recurringCashflows,
+        existingSingleCashflows
+      );
 
-//   // Process recurring cashflows
-//   const processRecurringCashflows = async () => {
-//     if (recurringCashFlows.length === 0) {
-//       return;
-//     }
+      if (singleCashflowsToInsert.length === 0) {
+        console.log("No new single cashflows to create");
+        markAsProcessed();
+        return;
+      }
 
-//     try {
-//       // Get cashflows that need to be created
-//       const cashFlowsToCreate = processRecurringCashFlows(
-//         recurringCashFlows,
-//         singleCashFlows
-//       );
+      // Create the new single cashflows
+      const { promise } = await addSingleCashflowMutation(
+        singleCashflowsToInsert,
+        profile.id
+      );
 
-//       if (cashFlowsToCreate.length === 0) {
-//         // Update last processed time even if no cashflows to create
-//         if (typeof window !== "undefined") {
-//           localStorage.setItem(LAST_PROCESSED_KEY, new Date().toISOString());
-//         }
-//         return;
-//       }
+      if (promise.error) {
+        console.error("Error creating single cashflows:", promise.error);
+        return;
+      }
 
-//       // Create the single cashflows (the action expects the original format)
-//       await createMultipleMutation.mutateAsync({
-//         cashFlows: cashFlowsToCreate,
-//         recurringCashFlows,
-//       });
+      console.log(
+        `Successfully created ${singleCashflowsToInsert.length} single cashflow(s) from recurring cashflows`
+      );
+      markAsProcessed();
+    } catch (error) {
+      console.error("Error processing recurring cashflows:", error);
+    } finally {
+      processingRef.current = false;
+    }
+  }, [
+    profile?.id,
+    recurringCashflows,
+    existingSingleCashflows,
+    isRecurringReady,
+    isSingleReady,
+    hasProcessedToday,
+    markAsProcessed,
+  ]);
 
-//       // Update last processed time
-//       if (typeof window !== "undefined") {
-//         localStorage.setItem(LAST_PROCESSED_KEY, new Date().toISOString());
-//       }
-//     } catch (error) {
-//       console.error("Error in processRecurringCashflows:", error);
-//     }
-//   };
+  /**
+   * Manually trigger processing (useful for testing or manual refresh)
+   */
+  const triggerProcessing = useCallback(() => {
+    hasProcessedTodayRef.current = false;
+    processRecurringCashflows();
+  }, [processRecurringCashflows]);
 
-//   // Effect to run the check when component mounts and data is available
-//   useEffect(() => {
-//     if (typeof window === "undefined") return;
+  // Automatically process on mount if not already processed today
+  useEffect(() => {
+    // Only process if data is ready and we haven't processed today
+    if (isRecurringReady && isSingleReady && profile?.id) {
+      if (!hasProcessedToday()) {
+        processRecurringCashflows();
+      } else {
+        hasProcessedTodayRef.current = true;
+      }
+    }
+  }, [
+    isRecurringReady,
+    isSingleReady,
+    profile?.id,
+    hasProcessedToday,
+    processRecurringCashflows,
+  ]);
 
-//     if (
-//       recurringCashFlows.length > 0 &&
-//       singleCashFlows.length >= 0 &&
-//       shouldProcess() &&
-//       !createMultipleMutation.isPending
-//     ) {
-//       processRecurringCashflows();
-//     }
-//   }, [recurringCashFlows, singleCashFlows]);
-
-//   // Optional: Manual trigger function
-//   const triggerProcessing = () => {
-//     processRecurringCashflows();
-//   };
-
-//   return {
-//     isProcessing: createMultipleMutation.isPending,
-//     triggerProcessing,
-//     lastProcessed:
-//       typeof window !== "undefined"
-//         ? localStorage.getItem(LAST_PROCESSED_KEY)
-//         : null,
-//     error: createMultipleMutation.error,
-//   };
-// }
+  return {
+    triggerProcessing,
+  };
+};

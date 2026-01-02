@@ -1,5 +1,6 @@
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useLocation } from "@tanstack/react-router";
+import { useProcessRecurringCashflows } from "@/hooks/useProcessRecurringCashflows";
 import { useMemo } from "react";
 
 import { AppShell, alpha, getThemeColor, useMantineTheme } from "@mantine/core";
@@ -11,7 +12,7 @@ import Navbar from "./Navbar";
 import { getGradientForColor } from "@/constants/colors";
 import { AppOptions } from "@/types/settings.types";
 
-export function Shell({children}: {children: React.ReactNode}) {
+export function Shell({ children }: { children: React.ReactNode }) {
   const {
     isAsideOpen,
     toggleAside,
@@ -23,6 +24,7 @@ export function Shell({children}: {children: React.ReactNode}) {
   } = useSettingsStore();
   const location = useLocation();
   const theme = useMantineTheme();
+  useProcessRecurringCashflows();
 
   // Determine the current app based on the location pathname
   const currentApp = useMemo(() => {
@@ -100,7 +102,11 @@ export function Shell({children}: {children: React.ReactNode}) {
         style={{ transition: "width 0.4s ease-in", overflow: "hidden" }}
         withBorder={false}
       >
-        <Aside toggleAside={toggleAside} isAsideOpen={isAsideOpen} currentAppColor={currentAppColor}/>
+        <Aside
+          toggleAside={toggleAside}
+          isAsideOpen={isAsideOpen}
+          currentAppColor={currentAppColor}
+        />
       </AppShell.Aside>
       <SettingsModal />
       <OfflineIndicator />

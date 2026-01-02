@@ -82,7 +82,7 @@ export default function FinanceRecurringTab() {
   }, [recurringCashFlows]);
 
   // Filter active and completed recurring cash flows
-  const today = new Date();
+  const today = useMemo(() => new Date(), []);
   const activeCashFlows = useMemo(
     () =>
       recurringCashFlows.filter((cashFlow) => {
@@ -92,7 +92,7 @@ export default function FinanceRecurringTab() {
           !cashFlow.end_date || new Date(cashFlow.end_date) > today;
         return hasStarted && endsInFuture;
       }),
-    [recurringCashFlows]
+    [recurringCashFlows, today]
   );
 
   const filteredActiveCashFlows = useMemo(
@@ -140,7 +140,7 @@ export default function FinanceRecurringTab() {
           isCompleted = isCompleted && cashFlow.amount <= 0;
         return isCompleted;
       }),
-    [recurringCashFlows, typeFilter]
+    [recurringCashFlows, typeFilter, today]
   );
 
   const filteredCompletedCashFlows = useMemo(
@@ -164,7 +164,7 @@ export default function FinanceRecurringTab() {
           isFuture = isFuture && cashFlow.amount <= 0;
         return isFuture;
       }),
-    [recurringCashFlows, typeFilter]
+    [recurringCashFlows, typeFilter, today]
   );
 
   const filteredFutureCashFlows = useMemo(
@@ -277,7 +277,7 @@ export default function FinanceRecurringTab() {
   }
 
   return (
-    <Group wrap="nowrap" align="flex-start" mt="lg" mx="lg">
+    <Group wrap="nowrap" align="flex-start" mt="lg" mx="lg" gap="xl">
       {/* Navbar */}
       <FinancesNavbar
         items={[
@@ -369,7 +369,7 @@ export default function FinanceRecurringTab() {
         ]}
       />
       {/* Tables */}
-      <Stack gap="sm" mb="xl"  w="100%">
+      <Stack gap="sm" mb="xl" w="100%">
         {isRecurringCashFlowsLoading ? (
           Array.from({ length: 5 }, (_, i) => (
             <Skeleton height={45} w="100%" key={i} />

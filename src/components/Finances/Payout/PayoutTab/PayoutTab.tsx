@@ -45,7 +45,7 @@ export default function PayoutTab() {
   }, [payouts, singleCashFlows, projects, timerSessions]);
 
   return (
-    <Group wrap="nowrap" align="flex-start" mt="lg" mx="lg">
+    <Group wrap="nowrap" align="flex-start" mt="lg" mx="lg" gap="xl">
       <FinancesNavbar
         items={[
           <FinancesNavbarToolbar

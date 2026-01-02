@@ -8,6 +8,7 @@ import {
 import {
   InsertRecurringCashFlow,
   RecurringCashFlow,
+  DeleteRecurringCashFlowMode,
 } from "@/types/finance.types";
 import { Tables, TablesUpdate } from "@/types/db.types";
 

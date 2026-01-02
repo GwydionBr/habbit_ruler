@@ -46,16 +46,6 @@ import FinancesNavbarDefaultCard from "@/components/Finances/FinancesNavbar/Fina
 import SelectBankAccount from "@/components/Finances/BankAccount/SelectBankAccount";
 
 export default function FinanceSingleTab() {
-  // const {
-  //   mutate: deleteSingleCashFlows,
-  //   isPending: isDeletingSingleCashFlows,
-  // } = useDeleteSingleCashflowMutation({
-  //   onSuccess: () => {
-  //     setSelectedCashFlows([]);
-  //     closeBulkSelection();
-  //     setLastSelectedIndex(null);
-  //   },
-  // });
   const { data: singleCashFlows = [], isLoading: isSingleCashFlowsLoading } =
     useSingleCashflowsQuery();
   const { deleteSingleCashflow } = useSingleCashflowMutations();
@@ -113,6 +103,7 @@ export default function FinanceSingleTab() {
     selectedCashFlows.length,
     selectedCashFlow,
     typeFilter,
+    closeBulkSelection,
   ]);
 
   const handleToggleBulkSelection = () => {
@@ -363,115 +354,115 @@ export default function FinanceSingleTab() {
           </FinancesNavbarDefaultCard>,
         ]}
       />
-      <ScrollArea mb="md" w="100%" h={`calc(100vh - 100px)`}>
-        <Collapse
-          transitionDuration={400}
-          in={bulkSelectionActive && filteredSingleCashFlows.length > 0}
-          w="100%"
+      {/* <ScrollArea mb="md" w="100%" h={`calc(100vh - 100px)`}> */}
+      <Collapse
+        transitionDuration={400}
+        in={bulkSelectionActive && filteredSingleCashFlows.length > 0}
+        w="100%"
+      >
+        <Card
+          p="md"
+          mb="md"
+          withBorder
+          shadow="sm"
+          radius="md"
+          style={{
+            borderColor:
+              "light-dark(var(--mantine-color-blue-3), var(--mantine-color-blue-8))",
+          }}
         >
-          <Card
-            p="md"
-            mb="md"
-            withBorder
-            shadow="sm"
-            radius="md"
-            style={{
-              borderColor:
-                "light-dark(var(--mantine-color-blue-3), var(--mantine-color-blue-8))",
-            }}
-          >
-            <Group justify="space-between" align="center">
-              <Group onClick={toggleAllCashFlows} style={{ cursor: "pointer" }}>
-                <SelectActionIcon
-                  onClick={() => {}}
-                  selected={
-                    selectedCashFlows.length === filteredSingleCashFlows.length
-                  }
-                  partiallySelected={
-                    selectedCashFlows.length > 0 &&
-                    selectedCashFlows.length < filteredSingleCashFlows.length
-                  }
-                />
-                <Text fz="sm" c="dimmed">
-                  {getLocalizedText("Alle auswählen", "Select All")}
-                </Text>
-              </Group>
-
-              <Badge color="blue" variant="light">
-                {selectedCashFlows.length}{" "}
-                {getLocalizedText("ausgewählt", "selected")}
-              </Badge>
-
-              <Group gap="xs">
-                <DeleteActionIcon
-                  disabled={selectedCashFlows.length === 0}
-                  onClick={handleDeleteCashFlows}
-                />
-              </Group>
+          <Group justify="space-between" align="center">
+            <Group onClick={toggleAllCashFlows} style={{ cursor: "pointer" }}>
+              <SelectActionIcon
+                onClick={() => {}}
+                selected={
+                  selectedCashFlows.length === filteredSingleCashFlows.length
+                }
+                partiallySelected={
+                  selectedCashFlows.length > 0 &&
+                  selectedCashFlows.length < filteredSingleCashFlows.length
+                }
+              />
+              <Text fz="sm" c="dimmed">
+                {getLocalizedText("Alle auswählen", "Select All")}
+              </Text>
             </Group>
-          </Card>
-        </Collapse>
-        <Stack gap={0}>
-          {isSingleCashFlowsLoading ? (
-            <Stack ml="xl" mt="lg">
-              {Array.from({ length: 5 }, (_, i) => (
-                <Skeleton height={45} w="100%" key={i} />
-              ))}
-            </Stack>
-          ) : (
-            filteredSingleCashFlows.map((cashFlow, index) => {
-              const isNewDate =
-                index === 0 ||
-                new Date(filteredSingleCashFlows[index - 1].date).setHours(
-                  0,
-                  0,
-                  0,
-                  0
-                ) !== new Date(cashFlow.date).setHours(0, 0, 0, 0);
-              return (
-                <Stack key={cashFlow.id} gap={5}>
-                  {isNewDate && (
-                    <Divider
-                      mt={5}
-                      label={
-                        <Badge variant="light">
-                          {formatDate(new Date(cashFlow.date))}
-                        </Badge>
-                      }
-                      labelPosition="left"
-                    />
-                  )}
-                  <SingleCashflowRow
-                    cashflow={cashFlow}
-                    ml="xl"
-                    onEdit={() => {
-                      setSelectedCashFlow(cashFlow);
-                      openEditCashFlow();
-                    }}
-                    selectedModeActive={bulkSelectionActive}
-                    isSelected={selectedCashFlows.includes(cashFlow.id)}
-                    onToggleSelected={(e) =>
-                      toggleCashFlowSelection(cashFlow.id, index, e.shiftKey)
+
+            <Badge color="blue" variant="light">
+              {selectedCashFlows.length}{" "}
+              {getLocalizedText("ausgewählt", "selected")}
+            </Badge>
+
+            <Group gap="xs">
+              <DeleteActionIcon
+                disabled={selectedCashFlows.length === 0}
+                onClick={handleDeleteCashFlows}
+              />
+            </Group>
+          </Group>
+        </Card>
+      </Collapse>
+      <Stack gap={0} w="100%">
+        {isSingleCashFlowsLoading ? (
+          <Stack ml="xl" mt="lg">
+            {Array.from({ length: 5 }, (_, i) => (
+              <Skeleton height={45} w="100%" key={i} />
+            ))}
+          </Stack>
+        ) : (
+          filteredSingleCashFlows.map((cashFlow, index) => {
+            const isNewDate =
+              index === 0 ||
+              new Date(filteredSingleCashFlows[index - 1].date).setHours(
+                0,
+                0,
+                0,
+                0
+              ) !== new Date(cashFlow.date).setHours(0, 0, 0, 0);
+            return (
+              <Stack key={cashFlow.id} gap={5}>
+                {isNewDate && (
+                  <Divider
+                    mt={5}
+                    label={
+                      <Badge variant="light">
+                        {formatDate(new Date(cashFlow.date))}
+                      </Badge>
                     }
+                    labelPosition="left"
                   />
-                </Stack>
-              );
-            })
-          )}
-        </Stack>
-      </ScrollArea>
-      {selectedCashFlow && (
-        <EditCashFlowDrawer
-          cashFlow={selectedCashFlow}
-          opened={editCashFlowOpened}
-          onClose={closeEditCashFlow}
+                )}
+                <SingleCashflowRow
+                  cashflow={cashFlow}
+                  ml="xl"
+                  onEdit={() => {
+                    setSelectedCashFlow(cashFlow);
+                    openEditCashFlow();
+                  }}
+                  selectedModeActive={bulkSelectionActive}
+                  isSelected={selectedCashFlows.includes(cashFlow.id)}
+                  onToggleSelected={(e) =>
+                    toggleCashFlowSelection(cashFlow.id, index, e.shiftKey)
+                  }
+                />
+              </Stack>
+            );
+          })
+        )}
+        {selectedCashFlow && (
+          <EditCashFlowDrawer
+            cashFlow={selectedCashFlow}
+            opened={editCashFlowOpened}
+            onClose={closeEditCashFlow}
+          />
+        )}
+        <CashFlowModal
+          opened={cashFlowModalOpened}
+          onClose={closeCashFlowModal}
+          isSingle={true}
         />
-      )}
-      <CashFlowModal
-        opened={cashFlowModalOpened}
-        onClose={closeCashFlowModal}
-        isSingle={true}
-      />
+      </Stack>
+      {/* </ScrollArea> */}
     </Group>
   );
 }

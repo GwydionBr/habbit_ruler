@@ -167,25 +167,16 @@ export default function EditCashFlowDrawer({
     mode: DeleteRecurringCashFlowMode
   ) {
     if (isSingleCashFlow(cashFlow)) return;
-    // TODO: Implement deleting recurring cashflow with mode
-    // deleteRecurringCashFlow({
-    //   recurringCashFlowId: cashFlow.id,
-    //   mode,
-    // });
+    deleteRecurringCashflow(cashFlow.id, mode);
+    onClose();
   }
 
   async function handleDeactivateRecurring() {
     if (isSingleCashFlow(cashFlow)) return;
-    // TODO: Implement deactivating recurring cashflow
-    // updateRecurringCashFlow({
-    //   recurringCashFlow: {
-    //     ...cashFlow,
-    //     end_date: new Date().toISOString(),
-    //     categories: categories.map((category) => ({
-    //       finance_category: category,
-    //     })),
-    //   },
-    // });
+    updateRecurringCashflow(cashFlow.id, {
+      end_date: new Date().toISOString(),
+    });
+    onClose();
   }
 
   async function handleUpdateAll() {
@@ -202,6 +193,7 @@ export default function EditCashFlowDrawer({
     //   },
     //   shouldUpdateSingleCashFlows: true,
     // });
+    console.log("update all", pendingValues);
   }
 
   async function handleUpdateRecurringOnly() {
@@ -216,6 +208,7 @@ export default function EditCashFlowDrawer({
     //     })),
     //   },
     // });
+    console.log("update recurring cash flow only", pendingValues);
   }
 
   const handleAddCategory = (category: Tables<"finance_category">) => {

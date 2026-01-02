@@ -36,7 +36,7 @@ export const useSingleCashflowMutations = () => {
   const handleAddSingleCashflow = useCallback(
     async (
       newSingleCashflow: InsertSingleCashFlow | InsertSingleCashFlow[]
-    ): Promise<SingleCashFlow | undefined> => {
+    ): Promise<SingleCashFlow[] | undefined> => {
       // Check if user is logged in
       if (!profile?.id) {
         showActionErrorNotification(
@@ -45,7 +45,7 @@ export const useSingleCashflowMutations = () => {
             "No user profile found"
           )
         );
-        return;
+        return undefined;
       }
 
       try {
@@ -59,7 +59,7 @@ export const useSingleCashflowMutations = () => {
         if (promise.error) {
           console.error("Error adding single cashflow", promise.error);
           showActionErrorNotification(promise.error.message);
-          return;
+          return undefined;
         }
 
         // Show success notification
@@ -81,6 +81,7 @@ export const useSingleCashflowMutations = () => {
           );
         }
         console.log(data);
+        return data;
       } catch (error) {
         console.error("Error adding single cashflow try/catch", error);
         // Show total error notification

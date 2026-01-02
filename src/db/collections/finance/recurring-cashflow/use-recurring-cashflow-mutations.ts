@@ -13,10 +13,15 @@ import {
 import {
   InsertRecurringCashFlow,
   RecurringCashFlow,
+  DeleteRecurringCashFlowMode,
 } from "@/types/finance.types";
 import { TablesUpdate } from "@/types/db.types";
 import { processRecurringCashFlows } from "@/lib/helper/processRecurringCashflows";
-import { addSingleCashflowMutation } from "../single-cashflow/single-cashflow-mutations";
+import {
+  addSingleCashflowMutation,
+  deleteSingleCashflowMutation,
+} from "../single-cashflow/single-cashflow-mutations";
+import { useSingleCashflowsQuery } from "../single-cashflow/use-single-cashflow-query";
 
 /**
  * Hook for Recurring Cashflow operations with automatic notifications.
@@ -28,6 +33,7 @@ import { addSingleCashflowMutation } from "../single-cashflow/single-cashflow-mu
  */
 export const useRecurringCashflowMutations = () => {
   const { data: profile } = useProfile();
+  const { data: singleCashflows } = useSingleCashflowsQuery();
   const { getLocalizedText } = useIntl();
 
   /**
@@ -148,24 +154,34 @@ export const useRecurringCashflowMutations = () => {
    * Deletes a Recurring Cashflow with automatic notification.
    */
   const handleDeleteRecurringCashflow = useCallback(
-    async (id: string | string[]) => {
+    async (id: string | string[], mode: DeleteRecurringCashFlowMode) => {
       try {
-        const transaction = deleteRecurringCashflowMutation(id);
-        const result = await transaction.isPersisted.promise;
-
-        if (result.error) {
-          showActionErrorNotification(result.error.message);
-          return;
+        const ids = Array.isArray(id) ? id : [id];
+        if (mode === DeleteRecurringCashFlowMode.keep_unlinked) {
+          const transaction = deleteRecurringCashflowMutation(ids);
+          await transaction.isPersisted.promise;
+          showActionSuccessNotification(
+            getLocalizedText(
+              "Wiederkehrender Cashflow erfolgreich gelöscht (Verknüpfung entfernt)",
+              "Recurring cashflow successfully deleted (unlinked)"
+            )
+          );
+        } else if (mode === DeleteRecurringCashFlowMode.delete_all) {
+          const singleCashflowsToDelete = singleCashflows.filter((cashflow) =>
+            ids.includes(cashflow.recurring_cash_flow_id ?? "")
+          );
+          const transaction = deleteRecurringCashflowMutation(ids);
+          await transaction.isPersisted.promise;
+          deleteSingleCashflowMutation(
+            singleCashflowsToDelete.map((cashflow) => cashflow.id)
+          );
+          showActionSuccessNotification(
+            getLocalizedText(
+              "Wiederkehrender Cashflow und alle verknüpften Einmal-Cashflows erfolgreich gelöscht",
+              "Recurring cashflow and all linked single cashflows successfully deleted"
+            )
+          );
         }
-
-        showActionSuccessNotification(
-          getLocalizedText(
-            "Wiederkehrender Cashflow erfolgreich gelöscht",
-            "Recurring cashflow successfully deleted"
-          )
-        );
-
-        return result;
       } catch (error) {
         showActionErrorNotification(
           getLocalizedText(

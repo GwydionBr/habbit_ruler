@@ -8,9 +8,9 @@ export interface Payout extends Tables<"payout"> {
 }
 
 // Bank Account Types
-export interface BankAccount extends Tables<"bank_account"> {}
-export interface InsertBankAccount extends TablesInsert<"bank_account"> {}
-export interface UpdateBankAccount extends TablesUpdate<"bank_account"> {}
+export type BankAccount = Tables<"bank_account">;
+export type InsertBankAccount = TablesInsert<"bank_account">;
+export type UpdateBankAccount = TablesUpdate<"bank_account">;
 
 // Single Cash Flow Types
 export interface SingleCashFlow extends Tables<"single_cash_flow"> {
@@ -27,12 +27,10 @@ export interface UpdateSingleCashFlow extends TablesUpdate<"single_cash_flow"> {
 export interface RecurringCashFlow extends Tables<"recurring_cash_flow"> {
   categories: { finance_category: Tables<"finance_category"> }[];
 }
-export interface InsertRecurringCashFlow
-  extends TablesInsert<"recurring_cash_flow"> {
+export interface InsertRecurringCashFlow extends TablesInsert<"recurring_cash_flow"> {
   categories: { finance_category: Tables<"finance_category"> }[];
 }
-export interface UpdateRecurringCashFlow
-  extends TablesUpdate<"recurring_cash_flow"> {
+export interface UpdateRecurringCashFlow extends TablesUpdate<"recurring_cash_flow"> {
   categories: { finance_category: Tables<"finance_category"> }[];
 }
 

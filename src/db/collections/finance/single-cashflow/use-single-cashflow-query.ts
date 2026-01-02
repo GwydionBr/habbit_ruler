@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useMemo } from "react";
 import {
   createLiveQueryCollection,
@@ -29,9 +28,8 @@ const singleCashflowCategoryMappingCollection = createLiveQueryCollection((q) =>
     }))
 );
 
-export const useSingleCashflows = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isReady, setIsReady] = useState(false);
+export const useSingleCashflowsQuery = () => {
+  // Fetch single cashflows
   const {
     data: cashflows,
     isLoading: isCashflowsLoading,
@@ -39,6 +37,8 @@ export const useSingleCashflows = () => {
   } = useLiveQuery((q) =>
     q.from({ singleCashflows: singleCashflowsCollection })
   );
+
+  // Fetch single cashflow category mappings
   const {
     data: mappings,
     isLoading: isMappingsLoading,
@@ -47,14 +47,19 @@ export const useSingleCashflows = () => {
     q.from({ mappings: singleCashflowCategoryMappingCollection })
   );
 
-  useEffect(() => {
-    setIsLoading(isCashflowsLoading || isMappingsLoading);
-  }, [isCashflowsLoading, isMappingsLoading]);
+  // Calculate loading state
+  const isLoading = useMemo(
+    () => isCashflowsLoading || isMappingsLoading,
+    [isCashflowsLoading, isMappingsLoading]
+  );
 
-  useEffect(() => {
-    setIsReady(isCashflowsReady && isMappingsReady);
-  }, [isCashflowsReady, isMappingsReady]);
+  // Calculate ready state
+  const isReady = useMemo(
+    () => isCashflowsReady && isMappingsReady,
+    [isCashflowsReady, isMappingsReady]
+  );
 
+  // Combine cashflows and categories
   const cashflowsWithCategories = useMemo((): SingleCashFlow[] => {
     if (!cashflows) return [];
 
@@ -62,6 +67,7 @@ export const useSingleCashflows = () => {
       string,
       SingleCashFlow["categories"]
     >();
+    // Map categories to cashflows
     mappings?.forEach(({ cashflowId, category }) => {
       if (!categoriesByCashflow.has(cashflowId)) {
         categoriesByCashflow.set(cashflowId, []);
@@ -71,11 +77,13 @@ export const useSingleCashflows = () => {
       });
     });
 
+    // Return cashflows with categories
     return cashflows.map((cashflow) => ({
       ...cashflow,
       categories: categoriesByCashflow.get(cashflow.id) || [],
     }));
   }, [cashflows, mappings]);
 
+  // Return cashflows with categories and loading/ready states
   return { data: cashflowsWithCategories, isLoading, isReady };
 };

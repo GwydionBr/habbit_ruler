@@ -9,12 +9,12 @@ import {
   addSingleCashflow,
   updateSingleCashflow,
   deleteSingleCashflow,
-  syncSingleCashflowCategories,
-  getSingleCashflowWithCategories,
 } from "./single-cashflow-mutations";
-import { InsertSingleCashFlow, SingleCashFlow } from "@/types/finance.types";
-import { TablesUpdate } from "@/types/db.types";
-import { constants } from "buffer";
+import {
+  InsertSingleCashFlow,
+  SingleCashFlow,
+  UpdateSingleCashFlow,
+} from "@/types/finance.types";
 
 /**
  * Hook for Single Cashflow operations with automatic notifications.
@@ -33,8 +33,9 @@ export const useSingleCashflowMutations = () => {
    */
   const handleAddSingleCashflow = useCallback(
     async (
-      newSingleCashflow: InsertSingleCashFlow 
+      newSingleCashflow: InsertSingleCashFlow | InsertSingleCashFlow[]
     ): Promise<SingleCashFlow | undefined> => {
+      // Check if user is logged in
       if (!profile?.id) {
         showActionErrorNotification(
           getLocalizedText(
@@ -46,45 +47,39 @@ export const useSingleCashflowMutations = () => {
       }
 
       try {
-        const cashflowId = newSingleCashflow.id || crypto.randomUUID();
-        const transaction = addSingleCashflow(
-          { ...newSingleCashflow, id: cashflowId },
+        // Add single cashflows to database
+        const { promise, data } = await addSingleCashflow(
+          newSingleCashflow,
           profile.id
         );
-        const result = await transaction.isPersisted.promise;
 
-        if (result.error) {
-          showActionErrorNotification(result.error.message);
+        // Check if transaction failed
+        if (promise.error) {
+          showActionErrorNotification(promise.error.message);
           return;
         }
 
-        // Sync categories if provided
-        if (
-          newSingleCashflow.categories &&
-          newSingleCashflow.categories.length > 0
-        ) {
-          await syncSingleCashflowCategories(
-            cashflowId,
-            newSingleCashflow.categories.map(
-              (category) => category.finance_category.id
-            ),
-            profile.id
+        // Show success notification
+        if (Array.isArray(newSingleCashflow)) {
+          // Show success notification for multiple cashflows
+          showActionSuccessNotification(
+            getLocalizedText(
+              ` ${data.length} Einzelne Cashflows erfolgreich erstellt`,
+              ` ${data.length} Single cashflows successfully created`
+            )
+          );
+        } else {
+          // Show success notification for single cashflow
+          showActionSuccessNotification(
+            getLocalizedText(
+              "Einzelner Cashflow erfolgreich erstellt",
+              "Single cashflow successfully created"
+            )
           );
         }
-
-        // Get complete cashflow with categories
-        const completeCashflow =
-          await getSingleCashflowWithCategories(cashflowId);
-
-        showActionSuccessNotification(
-          getLocalizedText(
-            "Einzelner Cashflow erfolgreich erstellt",
-            "Single cashflow successfully created"
-          )
-        );
-
-        return completeCashflow;
+        console.log(data);
       } catch (error) {
+        // Show total error notification
         showActionErrorNotification(
           getLocalizedText(
             `Fehler: ${error instanceof Error ? error.message : "Unbekannter Fehler"}`,
@@ -102,8 +97,7 @@ export const useSingleCashflowMutations = () => {
   const handleUpdateSingleCashflow = useCallback(
     async (
       id: string | string[],
-      item: TablesUpdate<"single_cash_flow">,
-      categoryIds?: string[]
+      item: UpdateSingleCashFlow
     ): Promise<SingleCashFlow | undefined> => {
       if (!profile?.id) {
         showActionErrorNotification(
@@ -116,7 +110,7 @@ export const useSingleCashflowMutations = () => {
       }
 
       try {
-        const transaction = updateSingleCashflow(id, item);
+        const transaction = await updateSingleCashflow(id, item, profile.id);
         const result = await transaction.isPersisted.promise;
 
         if (result.error) {
@@ -124,28 +118,12 @@ export const useSingleCashflowMutations = () => {
           return;
         }
 
-        // Sync categories if provided
-        const cashflowId = typeof id === "string" ? id : id[0];
-        if (categoryIds !== undefined) {
-          await syncSingleCashflowCategories(
-            cashflowId,
-            categoryIds,
-            profile.id
-          );
-        }
-
-        // Get complete cashflow with categories
-        const completeCashflow =
-          await getSingleCashflowWithCategories(cashflowId);
-
         showActionSuccessNotification(
           getLocalizedText(
             "Einzelner Cashflow erfolgreich aktualisiert",
             "Single cashflow successfully updated"
           )
         );
-
-        return completeCashflow;
       } catch (error) {
         showActionErrorNotification(
           getLocalizedText(
@@ -196,8 +174,5 @@ export const useSingleCashflowMutations = () => {
     addSingleCashflow: handleAddSingleCashflow,
     updateSingleCashflow: handleUpdateSingleCashflow,
     deleteSingleCashflow: handleDeleteSingleCashflow,
-    // Helper functions
-    syncSingleCashflowCategories,
-    getSingleCashflowWithCategories,
   };
 };

@@ -56,17 +56,11 @@ export default function FinanceForm({
   useSettingsStore();
   const { data: financeCategories } = useFinanceCategories();
   const { getLocalizedText } = useIntl();
-  // const { mutate: addRecurringCashFlow, isPending: isAddingRecurringCashFlow } =
-  //   useAddRecurringCashflowMutation({ onSuccess: () => onClose() });
-  // const { data: financeCategories, isPending: isFinanceCategoriesPending } =
-  //   useFinanceCategoriesQuery();
-  // const { mutate: addSingleCashFlow, isPending: isAddingSingleCashFlow } =
-  //   useAddSingleCashflowMutation({ onSuccess: () => onClose() });
   const { addSingleCashflow } = useSingleCashflowMutations();
   const { addRecurringCashflow } = useRecurringCashflowMutations();
 
   async function handleSingleFinanceSubmit(values: SingleFinanceFormValues) {
-    addSingleCashflow({
+    await addSingleCashflow({
       ...values,
       date: values.date.toISOString(),
       categories: categories.map((category) => ({
@@ -79,6 +73,7 @@ export default function FinanceForm({
   async function handleRecurringFinanceSubmit(
     values: RecurringFinanceFormValues
   ) {
+    // TODO: Optimize Add Recurring Cashflow Mutation
     addRecurringCashflow({
       ...values,
       end_date: values.end_date?.toISOString(),

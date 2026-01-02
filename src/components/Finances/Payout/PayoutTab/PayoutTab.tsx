@@ -10,7 +10,7 @@ import FinancesNavbar from "../../FinancesNavbar/FinancesNavbar";
 import AdjustmentActionIcon from "@/components/UI/ActionIcons/AdjustmentActionIcon";
 
 import { SettingsTab } from "@/stores/settingsStore";
-import { useSingleCashflows } from "@/db/collections/finance/single-cashflow/use-single-cashflow-query";
+import { useSingleCashflowsQuery } from "@/db/collections/finance/single-cashflow/use-single-cashflow-query";
 import { Payout } from "@/types/finance.types";
 import { useWorkProjects } from "@/db/collections/work/work-project/use-work-project-query";
 import { useWorkTimeEntries } from "@/db/collections/work/work-time-entry/use-work-time-entry-query";
@@ -22,7 +22,7 @@ export default function PayoutTab() {
 
   const { data: payouts = [], isLoading: isPayoutsPending } = usePayouts();
   const { data: singleCashFlows = [], isLoading: isSingleCashFlowsPending } =
-    useSingleCashflows();
+    useSingleCashflowsQuery();
   const { data: projects = [], isLoading: isProjectPending } =
     useWorkProjects();
   const { data: timerSessions = [], isLoading: isTimeEntryPending } =

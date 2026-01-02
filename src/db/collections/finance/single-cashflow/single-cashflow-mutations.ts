@@ -3,8 +3,13 @@ import {
   singleCashflowsCollection,
   singleCashflowCategoriesCollection,
 } from "./single-cashflow-collection";
-import { SingleCashFlow } from "@/types/finance.types";
-import { Tables, TablesInsert, TablesUpdate } from "@/types/db.types";
+import {
+  InsertSingleCashFlow,
+  SingleCashFlow,
+  UpdateSingleCashFlow,
+} from "@/types/finance.types";
+import { PowerSyncTransactor } from "@tanstack/powersync-db-collection";
+import { createTransaction } from "@tanstack/react-db";
 
 /**
  * Adds a new Single Cashflow.
@@ -12,35 +17,68 @@ import { Tables, TablesInsert, TablesUpdate } from "@/types/db.types";
  *
  * @param newSingleCashflow - The data of the new cashflow
  * @param userId - The user ID
- * @returns Transaction object with isPersisted promise
+ * @returns Transaction object with isPersisted promise and data
  */
-export const addSingleCashflow = (
-  newSingleCashflow:
-    | Omit<TablesInsert<"single_cash_flow">, "categories">
-    | Omit<TablesInsert<"single_cash_flow">, "categories">[],
+export const addSingleCashflow = async (
+  newSingleCashflow: InsertSingleCashFlow | InsertSingleCashFlow[],
   userId: string
 ) => {
+  const customTransaction = createTransaction({
+    autoCommit: false,
+    mutationFn: async ({ transaction }) => {
+      // Use PowerSyncTransactor to apply the transaction to PowerSync
+      await new PowerSyncTransactor({ database: db }).applyTransaction(
+        transaction
+      );
+    },
+  });
+  // Create Array of cashflows to insert
   const cashflowsToInsert = Array.isArray(newSingleCashflow)
     ? newSingleCashflow
     : [newSingleCashflow];
-  const finishedCashflows = cashflowsToInsert.map((cashflow) => ({
-    ...cashflow,
-    id: cashflow.id || crypto.randomUUID(),
-    created_at: new Date().toISOString(),
-    title: cashflow.title || "",
-    currency: cashflow.currency || "EUR",
-    date: cashflow.date || new Date().toISOString(),
-    finance_client_id: cashflow.finance_client_id || null,
-    finance_project_id: cashflow.finance_project_id || null,
-    recurring_cash_flow_id: cashflow.recurring_cash_flow_id || null,
-    is_active: cashflow.is_active || true,
-    payout_id: cashflow.payout_id || null,
-    changed_date: cashflow.changed_date || null,
-    user_id: userId,
-  }));
-  const transaction = singleCashflowsCollection.insert(finishedCashflows);
 
-  return transaction;
+  const allNewSingleCashflows: SingleCashFlow[] = [];
+
+  customTransaction.mutate(() =>
+    cashflowsToInsert.forEach((cashflow) => {
+      // Extract categories and cashflow data
+      const { categories, ...cashflowData } = cashflow;
+      // Generate cashflow ID
+      const cashflowId = cashflowData.id || crypto.randomUUID();
+      // Insert cashflow
+      const newCashFlow = {
+        ...cashflowData,
+        id: cashflowId,
+        created_at: new Date().toISOString(),
+        title: cashflowData.title || "",
+        currency: cashflowData.currency || "EUR",
+        date: cashflowData.date || new Date().toISOString(),
+        finance_client_id: cashflowData.finance_client_id || null,
+        finance_project_id: cashflowData.finance_project_id || null,
+        recurring_cash_flow_id: cashflowData.recurring_cash_flow_id || null,
+        is_active: cashflowData.is_active || true,
+        payout_id: cashflowData.payout_id || null,
+        changed_date: cashflowData.changed_date || null,
+        user_id: userId,
+      };
+      singleCashflowsCollection.insert(newCashFlow);
+      // Insert categories
+      categories.forEach((category) => {
+        singleCashflowCategoriesCollection.insert({
+          id: crypto.randomUUID(),
+          created_at: new Date().toISOString(),
+          single_cash_flow_id: cashflowId,
+          finance_category_id: category.finance_category.id,
+          user_id: userId,
+        });
+      });
+      allNewSingleCashflows.push({ ...newCashFlow, categories });
+    })
+  );
+
+  await customTransaction.commit();
+  const promise = await customTransaction.isPersisted.promise;
+  return { promise, data: allNewSingleCashflows };
 };
 
 /**
@@ -48,15 +86,41 @@ export const addSingleCashflow = (
  *
  * @param id - The ID or IDs of the cashflow to update
  * @param item - The item to update
+ * @param userId - The user ID
  * @returns Transaction object with isPersisted promise
  */
-export const updateSingleCashflow = (
+export const updateSingleCashflow = async (
   id: string | string[],
-  item: TablesUpdate<"single_cash_flow">
+  item: UpdateSingleCashFlow,
+  userId: string
 ) => {
-  return singleCashflowsCollection.update(id, (draft) => {
-    Object.assign(draft, item);
+  const customTransaction = createTransaction({
+    autoCommit: false,
+    mutationFn: async ({ transaction }) => {
+      // Use PowerSyncTransactor to apply the transaction to PowerSync
+      await new PowerSyncTransactor({ database: db }).applyTransaction(
+        transaction
+      );
+    },
   });
+  const ids = Array.isArray(id) ? id : [id];
+  const { categories, ...cashflowData } = item;
+
+  customTransaction.mutate(() => {
+    singleCashflowsCollection.update(id, (draft) => {
+      Object.assign(draft, cashflowData);
+    });
+  });
+
+  // Commit the cashflow update first
+  await customTransaction.commit();
+  await customTransaction.isPersisted.promise;
+  const categoryIds = categories.map(
+    (category) => category.finance_category.id
+  );
+  await syncSingleCashflowCategories(ids, categoryIds, userId);
+
+  return customTransaction;
 };
 
 /**
@@ -72,100 +136,81 @@ export const deleteSingleCashflow = (id: string | string[]) => {
 /**
  * Synchronizes the Many-to-Many relations between Single Cashflow and Finance Categories.
  * Deletes old relations and creates new ones based on categoryIds.
+ * Can handle a single cashflow ID or an array of cashflow IDs.
  *
- * @param cashflowId - The cashflow ID
+ * @param cashflowId - The cashflow ID or array of cashflow IDs
  * @param categoryIds - Array of category IDs to associate
  * @param userId - The user ID
  */
 export async function syncSingleCashflowCategories(
-  cashflowId: string,
+  cashflowId: string | string[],
   categoryIds: string[],
   userId: string
 ): Promise<void> {
-  // 1. Get all existing relations for this cashflow
-  const existingRelations = await db.getAll<{
-    id: string;
-    finance_category_id: string;
-  }>(
-    "SELECT id, finance_category_id FROM single_cash_flow_category WHERE single_cash_flow_id = ?",
-    [cashflowId]
-  );
-
-  const existingCategoryIds = existingRelations.map(
-    (r) => r.finance_category_id
-  );
+  // Normalize to array
+  const cashflowIds = Array.isArray(cashflowId) ? cashflowId : [cashflowId];
   const newCategoryIds = categoryIds || [];
 
-  // 2. Find relations to delete (in existing but not in new)
-  const relationsToDelete = existingRelations.filter(
-    (relation) => !newCategoryIds.includes(relation.finance_category_id)
-  );
-
-  // 3. Find categories to add (in new but not in existing)
-  const categoriesToAdd = newCategoryIds.filter(
-    (categoryId) => !existingCategoryIds.includes(categoryId)
-  );
-
-  // 4. Delete old relations
-  const deletePromises = relationsToDelete.map((relation) =>
-    singleCashflowCategoriesCollection.delete(relation.id)
-  );
-
-  // 5. Create new relations
-  const insertPromises = categoriesToAdd.map((categoryId) =>
-    singleCashflowCategoriesCollection.insert({
-      id: crypto.randomUUID(),
-      single_cash_flow_id: cashflowId,
-      finance_category_id: categoryId,
-      user_id: userId,
-      created_at: new Date().toISOString(),
-    })
-  );
-
-  // 6. Wait for all transactions
-  const allTransactions = [...deletePromises, ...insertPromises];
-  await Promise.all(allTransactions.map((tx) => tx.isPersisted.promise));
-}
-
-/**
- * Loads a complete SingleCashFlow with all Categories.
- *
- * @param cashflowId - The cashflow ID
- * @returns Complete SingleCashFlow or undefined if not found
- */
-export async function getSingleCashflowWithCategories(
-  cashflowId: string
-): Promise<SingleCashFlow | undefined> {
-  // Get the cashflow
-  const cashflow = await db.getOptional<Omit<SingleCashFlow, "categories">>(
-    "SELECT * FROM single_cash_flow WHERE id = ?",
-    [cashflowId]
-  );
-
-  if (!cashflow) return undefined;
-
-  // Get the associated categories
-  const categoryRelations = await db.getAll<{
+  // 1. Get all existing relations for all cashflows
+  const placeholders = cashflowIds.map(() => "?").join(",");
+  const existingRelations = await db.getAll<{
+    id: string;
+    single_cash_flow_id: string;
     finance_category_id: string;
   }>(
-    "SELECT finance_category_id FROM single_cash_flow_category WHERE single_cash_flow_id = ?",
-    [cashflowId]
+    `SELECT id, single_cash_flow_id, finance_category_id FROM single_cash_flow_category WHERE single_cash_flow_id IN (${placeholders})`,
+    cashflowIds
   );
 
-  const categoryIds = categoryRelations.map((r) => r.finance_category_id);
+  // 2. Process each cashflow separately
+  const allDeletePromises: ReturnType<
+    typeof singleCashflowCategoriesCollection.delete
+  >[] = [];
+  const allInsertPromises: ReturnType<
+    typeof singleCashflowCategoriesCollection.insert
+  >[] = [];
 
-  // Get the complete category data
-  const categories =
-    categoryIds.length > 0
-      ? await db
-          .getAll<
-            Tables<"finance_category">
-          >(`SELECT * FROM finance_category WHERE id IN (${categoryIds.map(() => "?").join(",")})`, categoryIds)
-          .then((cats) => cats.map((cat) => ({ finance_category: cat })))
-      : [];
+  for (const currentCashflowId of cashflowIds) {
+    // Get existing relations for this specific cashflow
+    const cashflowRelations = existingRelations.filter(
+      (r) => r.single_cash_flow_id === currentCashflowId
+    );
+    const existingCategoryIds = cashflowRelations.map(
+      (r) => r.finance_category_id
+    );
 
-  return {
-    ...cashflow,
-    categories: categories || [],
-  } as SingleCashFlow;
+    // Find relations to delete (in existing but not in new)
+    const relationsToDelete = cashflowRelations.filter(
+      (relation) => !newCategoryIds.includes(relation.finance_category_id)
+    );
+
+    // Find categories to add (in new but not in existing)
+    const categoriesToAdd = newCategoryIds.filter(
+      (categoryId) => !existingCategoryIds.includes(categoryId)
+    );
+
+    // Delete old relations
+    relationsToDelete.forEach((relation) => {
+      allDeletePromises.push(
+        singleCashflowCategoriesCollection.delete(relation.id)
+      );
+    });
+
+    // Create new relations
+    categoriesToAdd.forEach((categoryId) => {
+      allInsertPromises.push(
+        singleCashflowCategoriesCollection.insert({
+          id: crypto.randomUUID(),
+          single_cash_flow_id: currentCashflowId,
+          finance_category_id: categoryId,
+          user_id: userId,
+          created_at: new Date().toISOString(),
+        })
+      );
+    });
+  }
+
+  // 3. Wait for all transactions
+  const allTransactions = [...allDeletePromises, ...allInsertPromises];
+  await Promise.all(allTransactions.map((tx) => tx.isPersisted.promise));
 }

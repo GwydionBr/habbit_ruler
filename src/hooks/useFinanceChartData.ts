@@ -13,7 +13,7 @@ import {
   addYearsToDate,
   isDateInInterval,
 } from "@/lib/financeChartHelperFunctions";
-import { useSingleCashflows } from "@/db/collections/finance/single-cashflow/use-single-cashflow-query";
+import { useSingleCashflowsQuery } from "@/db/collections/finance/single-cashflow/use-single-cashflow-query";
 
 /**
  * Represents a single data point in the chart
@@ -67,7 +67,7 @@ export function useFinanceChartData(
   dateRange: DateRange
 ) {
   // Get data from stores
-  const { data: singleCashFlows } = useSingleCashflows();
+  const { data: singleCashFlows } = useSingleCashflowsQuery();
 
   // stats will be computed after chartData is defined
 

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useIntl } from "@/hooks/useIntl";
-import { useSingleCashflows } from "@/db/collections/finance/single-cashflow/use-single-cashflow-query";
+import { useSingleCashflowsQuery } from "@/db/collections/finance/single-cashflow/use-single-cashflow-query";
 import { useSingleCashflowMutations } from "@/db/collections/finance/single-cashflow/use-single-cashflow-mutations";
 
 import {
@@ -57,7 +57,7 @@ export default function FinanceSingleTab() {
   //   },
   // });
   const { data: singleCashFlows = [], isLoading: isSingleCashFlowsLoading } =
-    useSingleCashflows();
+    useSingleCashflowsQuery();
   const { deleteSingleCashflow } = useSingleCashflowMutations();
   const { setIsModalOpen, setSelectedTab } = useSettingsStore();
   const { getLocalizedText, formatMoney, formatDate } = useIntl();

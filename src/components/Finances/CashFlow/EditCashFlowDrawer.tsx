@@ -17,7 +17,9 @@ import {
   MultiSelect,
 } from "@mantine/core";
 import SingleCashFlowForm from "@/components/Finances/CashFlow/Single/SingleFinanceForm";
-import RecurringCashFlowForm from "@/components/Finances/CashFlow/Recurring/RecurringFinanceForm";
+import RecurringCashFlowForm, {
+  RecurringFinanceFormValues,
+} from "@/components/Finances/CashFlow/Recurring/RecurringFinanceForm";
 import DeleteButton from "@/components/UI/Buttons/DeleteButton";
 
 import { Tables } from "@/types/db.types";
@@ -41,6 +43,7 @@ import {
   UpdateRecurringCashFlow,
   UpdateSingleCashFlow,
 } from "@/types/finance.types";
+import { SingleFinanceFormValues } from "./Single/SingleFinanceForm";
 
 // Type guard to distinguish between single and recurring cash flows
 function isSingleCashFlow(
@@ -121,15 +124,17 @@ export default function EditCashFlowDrawer({
     }
   }, [cashFlow]);
 
-  async function handleSubmit(values: any) {
-    if (isSingleCashFlow(cashFlow)) {
-      // TODO: Implement update single cash flow
-      // updateSingleCashflow(cashFlow.id, {
-      //   // categories: categories.map((category) => ({
-      //   //   finance_category: category,
-      //   // })),
-      //   ...values,
-      // });
+  async function handleSubmit(
+    values: SingleFinanceFormValues | RecurringFinanceFormValues
+  ) {
+    if (isSingleCashFlow(cashFlow) && "date" in values) {
+      await updateSingleCashflow(cashFlow.id, {
+        ...values,
+        date: values.date.toISOString(),
+        categories: categories.map((category) => ({
+          finance_category: category,
+        })),
+      });
     } else {
       // For recurring cash flows, check if any fields that affect single cash flows have changed
       const hasChanges =
@@ -160,6 +165,7 @@ export default function EditCashFlowDrawer({
         // });
       }
     }
+    onClose();
   }
 
   async function handleSingleDelete() {
@@ -480,16 +486,10 @@ export default function EditCashFlowDrawer({
           </Text>
 
           <Group justify="flex-end" gap="sm">
-            <Button
-              variant="outline"
-              onClick={handleUpdateRecurringOnly}
-            >
+            <Button variant="outline" onClick={handleUpdateRecurringOnly}>
               {getLocalizedText("Nein, beibehalten", "No, keep existing")}
             </Button>
-            <Button
-              color="blue"
-              onClick={handleUpdateAll}
-            >
+            <Button color="blue" onClick={handleUpdateAll}>
               {getLocalizedText("Ja, aktualisieren", "Yes, update all")}
             </Button>
           </Group>

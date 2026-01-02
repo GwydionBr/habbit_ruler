@@ -171,7 +171,6 @@ export function DatabaseMenu() {
     return db.registerListener({
       statusChanged: (status) => {
         setSyncStatus(status);
-        console.log("statusChanged", status);
       },
     });
   }, []);

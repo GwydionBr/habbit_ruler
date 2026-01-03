@@ -1,6 +1,7 @@
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useLocation } from "@tanstack/react-router";
 import { useProcessRecurringCashflows } from "@/hooks/useProcessRecurringCashflows";
+import { useAppUpdateNotification } from "@/hooks/useAppUpdateNotification";
 import { useMemo } from "react";
 
 import { AppShell, alpha, getThemeColor, useMantineTheme } from "@mantine/core";
@@ -25,6 +26,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const theme = useMantineTheme();
   useProcessRecurringCashflows();
+  useAppUpdateNotification();
 
   // Determine the current app based on the location pathname
   const currentApp = useMemo(() => {

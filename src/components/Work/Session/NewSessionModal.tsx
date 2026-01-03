@@ -78,6 +78,7 @@ export default function NewSessionModal({
       true_end_time: new Date(values.end_time).toISOString(),
       paused_seconds: 0,
       memo: values.memo || null,
+      hourly_payment: currentProject.hourly_payment,
     };
 
     const roundingSettings: TimerRoundingSettings = {

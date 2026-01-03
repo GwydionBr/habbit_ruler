@@ -14,7 +14,7 @@ import { getGradientForColor } from "@/constants/colors";
 import { AppOptions } from "@/types/settings.types";
 
 export function Shell({ children }: { children: React.ReactNode }) {
-  const {
+  const { 
     isAsideOpen,
     toggleAside,
     workColor,

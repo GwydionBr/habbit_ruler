@@ -49,8 +49,10 @@ export default function FinanceHeader() {
         </Title>
       </Group>
       <Tabs
-        h="100%"
+        variant="pills"
+        color={financeColor}
         defaultValue={activeTab}
+        radius="lg"
         w="100%"
         value={activeTab}
         onChange={(value) => setActiveTab(value as FinanceTab)}

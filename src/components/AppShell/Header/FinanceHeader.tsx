@@ -55,10 +55,7 @@ export default function FinanceHeader() {
         value={activeTab}
         onChange={(value) => setActiveTab(value as FinanceTab)}
       >
-        <Tabs.List
-          grow
-          h="100%"
-        >
+        <Tabs.List grow h="100%">
           <Tabs.Tab
             leftSection={<IconCashBanknote color="light-dark(blue, cyan)" />}
             value="Single"
@@ -98,7 +95,7 @@ export default function FinanceHeader() {
               <IconPresentationAnalytics color="light-dark(blue, cyan)" />
             }
             value="Analysis"
-              fz={18}
+            fz={18}
             fw={500}
           >
             {getLocalizedText("Analyse", "Analysis")}

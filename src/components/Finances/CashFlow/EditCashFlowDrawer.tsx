@@ -17,9 +17,7 @@ import {
   MultiSelect,
 } from "@mantine/core";
 import SingleCashFlowForm from "@/components/Finances/CashFlow/Single/SingleFinanceForm";
-import RecurringCashFlowForm, {
-  RecurringFinanceFormValues,
-} from "@/components/Finances/CashFlow/Recurring/RecurringFinanceForm";
+import RecurringCashFlowForm from "@/components/Finances/CashFlow/Recurring/RecurringFinanceForm";
 import DeleteButton from "@/components/UI/Buttons/DeleteButton";
 
 import { Tables } from "@/types/db.types";
@@ -43,7 +41,6 @@ import {
   UpdateRecurringCashFlow,
   UpdateSingleCashFlow,
 } from "@/types/finance.types";
-import { SingleFinanceFormValues } from "./Single/SingleFinanceForm";
 
 // Type guard to distinguish between single and recurring cash flows
 function isSingleCashFlow(
@@ -72,12 +69,6 @@ export default function EditCashFlowDrawer({
   const [pendingValues, setPendingValues] = useState<
     UpdateSingleCashFlow | UpdateRecurringCashFlow
   >(cashFlow);
-  // const { mutate: updateSingleCashFlow, isPending: isUpdatingSingleCashFlow } =
-  //   useUpdateSingleCashflowMutation({ onSuccess: onClose });
-  // const {
-  //   mutate: updateRecurringCashFlow,
-  //   isPending: isUpdatingRecurringCashFlow,
-  // } = useUpdateRecurringCashflowMutation({ onSuccess: onClose });
   const { updateSingleCashflow, deleteSingleCashflow } =
     useSingleCashflowMutations();
   const { updateRecurringCashflow, deleteRecurringCashflow } =
@@ -90,14 +81,6 @@ export default function EditCashFlowDrawer({
     "add-category",
   ]);
   const { data: financeCategories } = useFinanceCategories();
-  // const {
-  //   mutate: deleteSingleCashFlows,
-  //   isPending: isDeletingSingleCashFlows,
-  // } = useDeleteSingleCashflowMutation({ onSuccess: onClose });
-  // const {
-  //   mutate: deleteRecurringCashFlow,
-  //   isPending: isDeletingRecurringCashFlow,
-  // } = useDeleteRecurringCashflowMutation({ onSuccess: onClose });
 
   useEffect(() => {
     if (cashFlow) {
@@ -119,16 +102,17 @@ export default function EditCashFlowDrawer({
     }
   }, [cashFlow]);
 
-  async function handleSubmit(
-    values: SingleFinanceFormValues | RecurringFinanceFormValues
-  ) {
-    if (isSingleCashFlow(cashFlow) && "date" in values) {
+  // TODO: Handle Type Safety 
+  async function handleSubmit(values: any) {
+    if (isSingleCashFlow(cashFlow)) {
       await updateSingleCashflow(cashFlow.id, {
         ...values,
         date: values.date.toISOString(),
         categories,
       });
+      onClose();
     } else {
+      console.log("update recurring cash flow", values);
       // For recurring cash flows, check if any fields that affect single cash flows have changed
       const hasChanges =
         values.title !== cashFlow.title ||
@@ -137,30 +121,37 @@ export default function EditCashFlowDrawer({
         categories !== cashFlow.categories;
 
       if (hasChanges) {
+        console.log("has changes", hasChanges);
         // Store the values and show the update modal
         setPendingValues({
           id: cashFlow.id,
           categories,
           ...values,
+          end_date: values.end_date?.toISOString() ?? null,
+          start_date: values.start_date.toISOString(),
         });
         drawerStack.open("update-cash-flow");
       } else {
-        // TODO: Implement update recurring cash flow only
-        // No changes that affect single cash flows, just update the recurring cash flow
-        // updateRecurringCashflow(cashFlow.id, {
-        //   // categories: categories.map((category) => ({
-        //   //   finance_category: category,
-        //   // })),
-        //   ...values,
-        // });
+        console.log("no changes", values);
+        await updateRecurringCashflow(
+          cashFlow.id,
+          {
+            ...values,
+            categories,
+            end_date: values.end_date?.toISOString() ?? null,
+            start_date: values.start_date.toISOString(),
+          },
+          true
+        );
+        onClose();
       }
     }
-    onClose();
   }
 
   async function handleSingleDelete() {
     if (!isSingleCashFlow(cashFlow)) return;
     deleteSingleCashflow(cashFlow.id);
+    onClose();
   }
 
   async function handleDeleteRecurringWithMode(
@@ -175,6 +166,7 @@ export default function EditCashFlowDrawer({
     if (isSingleCashFlow(cashFlow)) return;
     updateRecurringCashflow(cashFlow.id, {
       end_date: new Date().toISOString(),
+      categories,
     });
     onClose();
   }
@@ -182,33 +174,25 @@ export default function EditCashFlowDrawer({
   async function handleUpdateAll() {
     if (!pendingValues) return;
 
-    // TODO: Implement update all recurring cash flows
-    // First update the recurring cash flow
-    // updateRecurringCashFlow({
-    //   recurringCashFlow: {
-    //     ...cashFlow,
-    //     categories: categories.map((category) => ({
-    //       finance_category: category,
-    //     })),
-    //   },
-    //   shouldUpdateSingleCashFlows: true,
-    // });
-    console.log("update all", pendingValues);
+    await updateRecurringCashflow(
+      cashFlow.id,
+      {
+        ...pendingValues,
+        categories,
+      },
+      true
+    );
+    onClose();
   }
 
   async function handleUpdateRecurringOnly() {
     if (!pendingValues) return;
 
-    // TODO: Implement update recurring cash flow only
-    // updateRecurringCashFlow({
-    //   recurringCashFlow: {
-    //     ...cashFlow,
-    //     categories: categories.map((category) => ({
-    //       finance_category: category,
-    //     })),
-    //   },
-    // });
-    console.log("update recurring cash flow only", pendingValues);
+    await updateRecurringCashflow(cashFlow.id, {
+      ...pendingValues,
+      categories,
+    });
+    onClose();
   }
 
   const handleAddCategory = (category: Tables<"finance_category">) => {

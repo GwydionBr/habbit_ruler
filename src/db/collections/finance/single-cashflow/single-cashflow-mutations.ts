@@ -94,6 +94,9 @@ export const updateSingleCashflowMutation = async (
   item: UpdateSingleCashFlow,
   userId: string
 ) => {
+  const ids = Array.isArray(id) ? id : [id];
+  const { categories, ...cashflowData } = item;
+
   const customTransaction = createTransaction({
     autoCommit: false,
     mutationFn: async ({ transaction }) => {
@@ -103,22 +106,26 @@ export const updateSingleCashflowMutation = async (
       );
     },
   });
-  const ids = Array.isArray(id) ? id : [id];
-  const { categories, ...cashflowData } = item;
 
-  customTransaction.mutate(() => {
-    singleCashflowsCollection.update(id, (draft) => {
-      Object.assign(draft, cashflowData);
-    });
-  });
+  // Update each cashflow individually to ensure mutations are created
+  customTransaction.mutate(() =>
+    ids.forEach((cashflowId) => {
+      singleCashflowsCollection.update(cashflowId, (draft) => {
+        Object.assign(draft, cashflowData);
+      });
+    })
+  );
 
-  // Commit the cashflow update first
+  // Wait for all updates to complete
   await customTransaction.commit();
-  await customTransaction.isPersisted.promise;
+  const promise = await customTransaction.isPersisted.promise;
+
+  // Sync categories for all updated cashflows
   const categoryIds = categories.map((category) => category.id);
   await syncSingleCashflowCategories(ids, categoryIds, userId);
 
-  return customTransaction;
+  // Return the first transaction (or create a combined one if needed)
+  return promise;
 };
 
 /**

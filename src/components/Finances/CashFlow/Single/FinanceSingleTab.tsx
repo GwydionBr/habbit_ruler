@@ -263,7 +263,7 @@ export default function FinanceSingleTab() {
   }, [getLocalizedText, singleCashFlows, typeFilter]);
 
   return (
-    <Group wrap="nowrap" align="flex-start" mt="lg" mx="lg" gap="xl">
+    <Group wrap="nowrap" align="flex-start" mt="lg" mx="lg" gap="xl" pb="xl">
       <FinancesNavbar
         items={[
           <FinancesNavbarToolbar

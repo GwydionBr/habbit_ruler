@@ -8,7 +8,7 @@ import {
 import {
   InsertRecurringCashFlow,
   RecurringCashFlow,
-  DeleteRecurringCashFlowMode,
+  UpdateRecurringCashFlow,
 } from "@/types/finance.types";
 import { Tables, TablesUpdate } from "@/types/db.types";
 
@@ -73,17 +73,25 @@ export const addRecurringCashflowMutation = async (
 /**
  * Updates a Recurring Cashflow.
  *
- * @param id - The ID or IDs of the cashflow to update
+ * @param id - The ID of the cashflow to update
  * @param item - The item to update
  * @returns Transaction object with isPersisted promise
  */
-export const updateRecurringCashflowMutation = (
-  id: string | string[],
-  item: TablesUpdate<"recurring_cash_flow">
+export const updateRecurringCashflowMutation = async (
+  id: string,
+  item: UpdateRecurringCashFlow,
+  userId: string
 ) => {
-  return recurringCashflowsCollection.update(id, (draft) => {
-    Object.assign(draft, item);
+  const { categories, ...cashflowData } = item;
+  const customTransaction = recurringCashflowsCollection.update(id, (draft) => {
+    Object.assign(draft, cashflowData);
   });
+
+  const promise = await customTransaction.isPersisted.promise;
+  const categoryIds = categories.map((category) => category.id);
+  await syncRecurringCashflowCategories(id, categoryIds, userId);
+
+  return promise;
 };
 
 /**
@@ -154,45 +162,3 @@ export async function syncRecurringCashflowCategories(
   await Promise.all(allTransactions.map((tx) => tx.isPersisted.promise));
 }
 
-/**
- * Loads a complete RecurringCashFlow with all Categories.
- *
- * @param cashflowId - The cashflow ID
- * @returns Complete RecurringCashFlow or undefined if not found
- */
-export async function getRecurringCashflowWithCategories(
-  cashflowId: string
-): Promise<RecurringCashFlow | undefined> {
-  // Get the cashflow
-  const cashflow = await db.getOptional<Omit<RecurringCashFlow, "categories">>(
-    "SELECT * FROM recurring_cash_flow WHERE id = ?",
-    [cashflowId]
-  );
-
-  if (!cashflow) return undefined;
-
-  // Get the associated categories
-  const categoryRelations = await db.getAll<{
-    finance_category_id: string;
-  }>(
-    "SELECT finance_category_id FROM recurring_cash_flow_category WHERE recurring_cash_flow_id = ?",
-    [cashflowId]
-  );
-
-  const categoryIds = categoryRelations.map((r) => r.finance_category_id);
-
-  // Get the complete category data
-  const categories =
-    categoryIds.length > 0
-      ? await db
-          .getAll<
-            Tables<"finance_category">
-          >(`SELECT * FROM finance_category WHERE id IN (${categoryIds.map(() => "?").join(",")})`, categoryIds)
-          .then((cats) => cats.map((cat) => cat))
-      : [];
-
-  return {
-    ...cashflow,
-    categories: categories || [],
-  } as RecurringCashFlow;
-}

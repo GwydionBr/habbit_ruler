@@ -14,12 +14,13 @@ import {
   InsertRecurringCashFlow,
   RecurringCashFlow,
   DeleteRecurringCashFlowMode,
+  UpdateRecurringCashFlow,
 } from "@/types/finance.types";
-import { TablesUpdate } from "@/types/db.types";
 import { processRecurringCashFlows } from "@/lib/helper/processRecurringCashflows";
 import {
   addSingleCashflowMutation,
   deleteSingleCashflowMutation,
+  updateSingleCashflowMutation,
 } from "../single-cashflow/single-cashflow-mutations";
 import { useSingleCashflowsQuery } from "../single-cashflow/use-single-cashflow-query";
 
@@ -93,10 +94,10 @@ export const useRecurringCashflowMutations = () => {
    */
   const handleUpdateRecurringCashflow = useCallback(
     async (
-      id: string | string[],
-      item: TablesUpdate<"recurring_cash_flow">,
-      categoryIds?: string[]
-    ): Promise<RecurringCashFlow | undefined> => {
+      id: string,
+      item: UpdateRecurringCashFlow,
+      shouldUpdateSingleCashFlows: boolean = false
+    ): Promise<void> => {
       if (!profile?.id) {
         showActionErrorNotification(
           getLocalizedText(
@@ -108,27 +109,33 @@ export const useRecurringCashflowMutations = () => {
       }
 
       try {
-        const transaction = updateRecurringCashflowMutation(id, item);
-        const result = await transaction.isPersisted.promise;
+        const promise = await updateRecurringCashflowMutation(
+          id,
+          item,
+          profile.id
+        );
 
-        if (result.error) {
-          showActionErrorNotification(result.error.message);
-          return;
+        if (shouldUpdateSingleCashFlows) {
+          const singleCashflowsToUpdate = singleCashflows.filter(
+            (cashflow) => cashflow.recurring_cash_flow_id === id
+          );
+          console.log("singleCashflowsToUpdate", singleCashflowsToUpdate);
+          await updateSingleCashflowMutation(
+            singleCashflowsToUpdate.map((cashflow) => cashflow.id),
+            {
+              title: item.title,
+              amount: item.amount,
+              currency: item.currency,
+              categories: item.categories,
+            },
+            profile.id
+          );
         }
 
-        // // Sync categories if provided
-        // const cashflowId = typeof id === "string" ? id : id[0];
-        // if (categoryIds !== undefined) {
-        //   await syncRecurringCashflowCategoriesMutation(
-        //     cashflowId,
-        //     categoryIds,
-        //     profile.id
-        //   );
-        // }
-
-        // // Get complete cashflow with categories
-        // const completeCashflow =
-        //   await getRecurringCashflowWithCategories(cashflowId);
+        if (promise.error) {
+          showActionErrorNotification(promise.error.message);
+          return;
+        }
 
         showActionSuccessNotification(
           getLocalizedText(
@@ -147,7 +154,7 @@ export const useRecurringCashflowMutations = () => {
         );
       }
     },
-    [profile?.id, getLocalizedText]
+    [profile?.id, getLocalizedText, singleCashflows]
   );
 
   /**
@@ -191,7 +198,7 @@ export const useRecurringCashflowMutations = () => {
         );
       }
     },
-    [getLocalizedText]
+    [getLocalizedText, singleCashflows]
   );
 
   return {

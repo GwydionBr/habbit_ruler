@@ -401,7 +401,7 @@ export default function FinanceProjectTab() {
   }, [navbarItems, filteredFinanceProjects, tab]);
 
   return (
-    <Group wrap="nowrap" align="flex-start" mt="lg" mx="lg" gap="xl">
+    <Box w="100%">
       <FinancesNavbar
         items={[
           <FinancesNavbarToolbar
@@ -481,7 +481,7 @@ export default function FinanceProjectTab() {
           </FinancesNavbarDefaultCard>,
         ]}
       />
-      <Stack w="100%"  align="center">
+      <Stack w="100%" align="center" pl={250} pb="xl" pr="lg" pt="md">
         <Stack gap={0} w="100%">
           {/* Bulk Selection */}
           <Collapse
@@ -645,6 +645,6 @@ export default function FinanceProjectTab() {
           financeProject={editProject}
         />
       )}
-    </Group>
+    </Box>
   );
 }

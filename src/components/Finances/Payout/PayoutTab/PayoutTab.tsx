@@ -3,7 +3,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { useIntl } from "@/hooks/useIntl";
 import { usePayouts } from "@/db/collections/finance/payout/use-payout-query";
 
-import { Stack, Group, Skeleton } from "@mantine/core";
+import { Stack, Group, Skeleton, Box } from "@mantine/core";
 
 import PayoutRowCard from "./PayoutRowCard";
 import FinancesNavbar from "../../FinancesNavbar/FinancesNavbar";
@@ -45,7 +45,7 @@ export default function PayoutTab() {
   }, [payouts, singleCashFlows, projects, timerSessions]);
 
   return (
-    <Group wrap="nowrap" align="flex-start" mt="lg" mx="lg" gap="xl">
+    <Box w="100%">
       <FinancesNavbar
         items={[
           <FinancesNavbarToolbar
@@ -68,7 +68,7 @@ export default function PayoutTab() {
           />,
         ]}
       />
-      <Stack w="100%" mb="xl" align="center">
+      <Stack w="100%" align="center" gap="sm" pl={250} pb="xl" pr="lg" pt="md">
         {isPayoutsPending ||
         isSingleCashFlowsPending ||
         isProjectPending ||
@@ -80,6 +80,6 @@ export default function PayoutTab() {
               <PayoutRowCard key={payout.id} payout={payout} />
             ))}
       </Stack>
-    </Group>
+    </Box>
   );
 }

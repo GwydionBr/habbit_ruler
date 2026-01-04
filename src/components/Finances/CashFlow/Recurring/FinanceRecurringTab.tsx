@@ -14,6 +14,7 @@ import {
   ThemeIcon,
   Collapse,
   Skeleton,
+  Box,
 } from "@mantine/core";
 
 import EditCashFlowButton from "@/components/Finances/CashFlow/EditCashFlowDrawer";
@@ -277,7 +278,7 @@ export default function FinanceRecurringTab() {
   }
 
   return (
-    <Group wrap="nowrap" align="flex-start" mt="lg" mx="lg" gap="xl">
+    <Box w="100%">
       {/* Navbar */}
       <FinancesNavbar
         items={[
@@ -369,13 +370,13 @@ export default function FinanceRecurringTab() {
         ]}
       />
       {/* Tables */}
-      <Stack gap="sm" mb="xl" w="100%">
+      <Stack w="100%" align="center" gap="sm" pl={250} pb="xl" pr="lg" pt="md">
         {isRecurringCashFlowsLoading ? (
           Array.from({ length: 5 }, (_, i) => (
             <Skeleton height={45} w="100%" key={i} />
           ))
         ) : (
-          <Stack gap="xl">
+          <Stack gap="xl" w="100%" maw={950}>
             <Collapse in={filter !== "future" && filter !== "completed"}>
               {filteredActiveCashFlows.length > 0 && (
                 <Stack w="100%">
@@ -480,6 +481,6 @@ export default function FinanceRecurringTab() {
           onClose={closeEditCashFlow}
         />
       )}
-    </Group>
+    </Box>
   );
 }

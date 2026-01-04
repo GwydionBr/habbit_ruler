@@ -93,7 +93,6 @@ export default function CalendarHeader() {
 
   return (
     <Grid
-      pt={7}
       columns={12}
       align="center"
       justify="center"

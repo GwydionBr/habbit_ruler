@@ -61,7 +61,7 @@ function RouteComponent() {
   return (
     <Box w="100%">
       <ProjectNavbar />
-      <ScrollArea pl={isWorkNavbarOpen ? 290 : 60} w="100%" h="calc(100vh - 80px)">
+      <ScrollArea pl={isWorkNavbarOpen ? 290 : 60} w="100%" h="calc(100vh - 55px)">
         {workProjects && workProjects.length === 0 && !isLoading ? (
           <WorkInitializer />
         ) : (

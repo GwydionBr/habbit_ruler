@@ -91,31 +91,6 @@ export default function ProjectToolbar({
     );
   }, [timeFilteredTimeEntries, setSelectedTimeEntryIds, setSelectedModeActive]);
 
-  const _handlePayoutToggle = () => {
-    if (!payoutOpened) {
-      setPayoutOpened(true);
-      setFilterOpened(false);
-    } else {
-      setPayoutOpened(false);
-    }
-  };
-
-  const _handleFilterToggle = () => {
-    if (!filterOpened) {
-      setFilterOpened(true);
-      setPayoutOpened(false);
-    } else {
-      setFilterOpened(false);
-    }
-  };
-
-  const _handleSelectionToggle = () => {
-    if (selectedModeActive) {
-      setSelectedTimeEntryIds([]);
-    }
-    toggleSelectedModeActive();
-  };
-
   const handleSessionPayoutClick = (timeEntries: WorkTimeEntry[]) => {
     setPayoutConvertionStartValues({
       value:
@@ -129,6 +104,9 @@ export default function ProjectToolbar({
       timeEntries,
     });
     setPayoutConversionOpened(true);
+    setFilterOpened(false);
+    setPayoutOpened(false);
+    setSelectedModeActive(false);
   };
 
   const handleSessionPayout = (
@@ -181,6 +159,7 @@ export default function ProjectToolbar({
             <Popover
               opened={filterOpened}
               onClose={() => setFilterOpened(false)}
+              onDismiss={() => setFilterOpened(false)}
               onOpen={() => setFilterOpened(true)}
               transitionProps={{ transition: "fade-down", duration: 300 }}
               position="bottom-start"
@@ -199,7 +178,14 @@ export default function ProjectToolbar({
                   opened={filterOpened}
                 />
               </Popover.Target>
-              <Popover.Dropdown p={0}>
+              <Popover.Dropdown
+                p="md"
+                maw={320}
+                style={{
+                  borderColor:
+                    "light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-2))",
+                }}
+              >
                 <ProjectFilter
                   timeSpan={filterTimeSpan}
                   onTimeSpanChange={setFilterTimeSpan}
@@ -214,6 +200,7 @@ export default function ProjectToolbar({
             <Popover
               opened={payoutOpened}
               onClose={() => setPayoutOpened(false)}
+              onDismiss={() => setPayoutOpened(false)}
               onOpen={() => setPayoutOpened(true)}
               transitionProps={{ transition: "fade-down", duration: 300 }}
               position="bottom-start"
@@ -228,7 +215,14 @@ export default function ProjectToolbar({
                   opened={payoutOpened}
                 />
               </Popover.Target>
-              <Popover.Dropdown p={0}>
+              <Popover.Dropdown
+                maw={400}
+                p="md"
+                style={{
+                  borderColor:
+                    "light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-2))",
+                }}
+              >
                 {project.hourly_payment ? (
                   <HourlyPayoutCard
                     project={{
@@ -248,7 +242,10 @@ export default function ProjectToolbar({
             label={getLocalizedText("Sitzung hinzufügen", "Add Session")}
           >
             <ActionIcon
-              onClick={() => setSessionFormOpened(true)}
+              onClick={() => {
+                setSessionFormOpened(true);
+                setSelectedModeActive(false);
+              }}
               size="md"
               variant="subtle"
             >
@@ -289,15 +286,20 @@ export default function ProjectToolbar({
                 mainControl={true}
               />
             </Popover.Target>
-            <Popover.Dropdown p={0}>
-              <Collapse in={selectedModeActive}>
-                <SessionSelector
-                  selectedSessions={selectedTimeEntryIds}
-                  timeFilteredSessions={timeFilteredTimeEntries}
-                  toggleAllSessions={toggleAllTimeEntries}
-                  handleSessionPayoutClick={handleSessionPayoutClick}
-                />
-              </Collapse>
+            <Popover.Dropdown
+              maw={400}
+              p="md"
+              style={{
+                borderColor:
+                  "light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-2))",
+              }}
+            >
+              <SessionSelector
+                selectedSessions={selectedTimeEntryIds}
+                timeFilteredSessions={timeFilteredTimeEntries}
+                toggleAllSessions={toggleAllTimeEntries}
+                handleSessionPayoutClick={handleSessionPayoutClick}
+              />
             </Popover.Dropdown>
           </Popover>
         </Group>

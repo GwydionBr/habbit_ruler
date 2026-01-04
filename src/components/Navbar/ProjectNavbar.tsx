@@ -33,11 +33,9 @@ import PlusActionIcon from "../UI/ActionIcons/PlusActionIcon";
 import XActionIcon from "../UI/ActionIcons/XActionIcon";
 
 export default function ProjectNavbar() {
-  const { setSelectedTab, setIsModalOpen } =
-    useSettingsStore();
+  const { setSelectedTab, setIsModalOpen } = useSettingsStore();
   const { isWorkNavbarOpen, toggleWorkNavbar } = useWorkStore();
   const { getLocalizedText } = useIntl();
-  const [isOverview, setIsOverview] = useState<boolean>(false);
   const [seachTree, setSeachTree] = useState<string>("");
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
   const [
@@ -64,6 +62,7 @@ export default function ProjectNavbar() {
       style={{
         borderColor:
           "light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-3))",
+        zIndex: 100,
       }}
     >
       <Group align="center" justify="space-between" p="md">
